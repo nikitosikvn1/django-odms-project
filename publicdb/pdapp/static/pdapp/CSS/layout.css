@@ -1,3 +1,53 @@
-h1 {
-    color: red;
+:root {
+    --main-red: #ff5858;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+header {
+    font-family: 'Open Sans', sans-serif;
+}
+
+#main-logo {
+    width: 108px;
+    height: auto;
+}
+
+.nav-link {
+    font-size: 18px;
+    position: relative;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    height: 2px;
+    background-color: var(--main-red);
+    transition: 0.5s;
+}
+
+.nav-link:hover {
+    color: var(--main-red);
+    transition: 0.5s;
+}
+
+.nav-link:hover:before {
+    width: 100%;
+}
+
+/* DEV */
+.search-img-wrap {
+    background-image: url(../IMG/search-passive.svg);
+    width: 24px;
+    height: 24px;
+}
+
+#search-button:hover .search-img-wrap {
+    background-image: url(../IMG/search-active.svg);
 }
