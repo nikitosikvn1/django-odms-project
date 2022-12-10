@@ -142,3 +142,88 @@ header {
 .rotate {
     transform: rotate(180deg);
 }
+
+.login-popup-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    transition: 0.5s all;
+
+    /* opacity: 0;
+    pointer-events: none; */
+}
+
+.login-popup-bg.active {
+    display: block;
+    transition: 0.5s all;
+
+    /* opacity: 1;
+    pointer-events: all; */
+}
+
+.login-popup-form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: white;
+    width: 500px;
+    height: 400px;
+    padding: 20px;
+    border-radius: 25px;
+    font-family: 'Roboto Mono', monospace;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    transition: 0.5s all;
+}
+
+.login-popup-form.active {
+    transform: translate(-50%, -50%) scale(1);
+    transition: 0.5s all;
+}
+
+.close-block {
+    width: 100%;
+}
+
+.close-block img {
+    width: 32px;
+    height: auto;
+    float: right;
+    cursor: pointer;
+}
+
+.form-headline {
+    margin-top: 32px;
+    margin-bottom: 30px;
+}
+
+.form-headline h1 {
+    text-align: center;
+    color: var(--main-red);
+    font-weight: 700;
+}
+
+.login-popup-form button {
+    width: 100%;
+    font-size: 20px;
+}
+
+.form-links {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.form-links a {
+    text-decoration: none;
+    color: #505050;
+}
+
+.form-links a:hover {
+    color: var(--main-red);
+    transition: 0.5s;
+}
