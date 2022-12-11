@@ -1,0 +1,26 @@
+{% extends 'pdapp/auth-layout.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Login</title>
+{% endblock %}
+
+
+{% block form %}
+    <h3 class="auth-headline">Sign in to your account</h3>
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingInput" placeholder="Username" name="username" autofocus>
+            <label for="floatingInput">Username</label>
+        </div>
+        <div class="form-floating mb-2">
+            <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
+            <label for="floatingPassword">Password</label>
+        </div>
+        <div class="links-block"><p>Forgot your password? <a href="#">Click here</a></p></div>
+        <button type="submit" class="btn btn-outline-danger" id="submit">LOGIN</button>
+        <hr id="form-line">
+        <div class="links-block"><p>Not yet a user? <a href="{% url 'registration' %}">Sign up here</a></p></div>
+    </form>
+{% endblock %}

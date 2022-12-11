@@ -18,7 +18,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'pdapp/CSS/layout.css' %}">
     <!-- JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="{% static 'pdapp/JS/jquery-3.6.1.min.js' %}"></script>
     <script src="{% static 'pdapp/JS/layout.js' %}"></script>
 </head>
 <body>
@@ -61,13 +61,12 @@
                     </div>
                     <div class="headline-login">
                         <div class="login">
-                            <a href="#" class="btn btn-danger open-login-form">Log in</a>
+                            <a href="{% url 'login' %}" class="btn btn-danger open-login-form">Log in</a>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
-
         <main>
             <div class="content">
                 <div class="sidebar">
@@ -99,27 +98,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="login-popup-bg">
-                    <form action="" class="login-popup-form">
-                        <div class="close-block"><img src="{% static 'pdapp/IMG/close-icon.svg' %}" alt=""></div>
-                        <div class="form-headline"><h1>LOGIN</h1></div>
-                        <div class="form-floating mb-3">
-                            <input type="email" class="form-control email-field" id="floatingInput" placeholder="name@example.com">
-                            <label for="floatingInput">Email address</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="password" class="form-control password-field" id="floatingPassword" placeholder="Password">
-                            <label for="floatingPassword">Password</label>
-                        </div>
-                        <button type="submit" class="btn btn-outline-danger" id="submit" disabled>LOGIN</button>
-
-                        <div class="form-links">
-                            <a href="#">Forgot password?</a>
-                            <a href="#">Registration</a>
-                        </div>
-                    </form>
                 </div>
 
             </div>
