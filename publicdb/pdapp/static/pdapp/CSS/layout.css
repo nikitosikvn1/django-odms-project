@@ -77,6 +77,7 @@ header {
 
 .content {
     margin-top: 20px;
+    display: flex;
 }
 
 .sidebar {
@@ -84,7 +85,7 @@ header {
     top: 0;
     left: 0;
     height: calc(100vh - 128px - 20px);
-    width: 260px;
+    min-width: 260px;
     border-right: 1px solid var(--border-color);
 }
 
@@ -145,3 +146,6 @@ header {
     transform: rotate(180deg);
 }
 
+.main-content {
+    width: 100%;
+}

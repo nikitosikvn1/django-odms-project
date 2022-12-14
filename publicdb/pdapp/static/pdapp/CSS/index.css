@@ -1,0 +1,24 @@
+:root {
+    --main-red: #ff5858;
+    --data-provider: #009933;
+}
+
+.articles {
+    padding-left: 30px;
+    padding-right: 30px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.articles-headline {
+    font-weight: 600;
+    color: var(--main-red);
+}
+
+.articles-data a {
+    text-decoration: none;
+}
+
+.articles-data .data-provider {
+    font-size: 14px;
+    color: var(--data-provider);
+}

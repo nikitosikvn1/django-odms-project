@@ -8,7 +8,12 @@ from .forms import RegistrationForm
 # Create your views here.
 
 def index(request):
-    return render(request, 'pdapp/layout.html')
+    logged = False
+
+    return render(request, "pdapp/index.html", {
+        "logged": logged
+    })
+
 
 def registration_view(request):
     form = RegistrationForm()
@@ -17,6 +22,7 @@ def registration_view(request):
         "form": form,
     })
 
+
 def login_view(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -24,3 +30,10 @@ def login_view(request):
         print(f"{username=}, {password=}")
 
     return render(request, 'pdapp/login.html')
+
+
+def logout_view(request):
+    pass
+
+def profile(request):
+    return HttpResponse("<h2>Your profile will be here!</h2>")
