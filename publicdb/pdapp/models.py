@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .validators import validate_csv_file
 from django.utils import timezone
+from .validators import validate_csv_file
 
 # Create your models here.
 
@@ -37,5 +37,12 @@ class DatasetFile(models.Model):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, related_name="datasetfiles")
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="createdfiles")
     provider = models.CharField(max_length=200)
-    date_creation = models.DateTimeField(default=timezone.now())
+    date_creation = models.DateTimeField(default=timezone.now)
     confirmed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-date_creation']
+        verbose_name_plural = "DatasetFiles"
+    
+    def __str__(self) -> str:
+        return f"{self.name} : {self.created_by}"
