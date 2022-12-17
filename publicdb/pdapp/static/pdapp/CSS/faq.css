@@ -1,0 +1,45 @@
+:root {
+    --main-red: #ff5858;
+    --border-color: #ebebeb;
+    --hover-pink: #ffe1e1;
+}
+
+.faq-section {
+    margin-top: 20px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.faq-headline {
+    color: var(--main-red);
+    font-weight: 600;
+}
+
+.faq-collapse {
+    margin-top: 20px;
+}
+
+.faq-collapse a {
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 500;
+    color: black;
+
+}
+
+.collapse-area {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #fcb1b1;
+    border-radius: 10px;
+}
+
+.collapse-area img {
+    height: 32px;
+    width: auto;
+    float: right;
+    transition: 0.3s ease;
+}
+
+.rotate {
+    transform: rotate(180deg);
+}

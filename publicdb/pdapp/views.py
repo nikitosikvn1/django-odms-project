@@ -29,7 +29,7 @@ def login_view(request):
         password = request.POST["password"]
         print(f"{username=}, {password=}")
 
-    return render(request, 'pdapp/login.html')
+    return render(request, "pdapp/login.html")
 
 
 def logout_view(request):
@@ -37,3 +37,8 @@ def logout_view(request):
 
 def profile(request):
     return HttpResponse("<h2>Your profile will be here!</h2>")
+
+# Temp
+
+def faq(request):
+    return render(request, "pdapp/faq.html")

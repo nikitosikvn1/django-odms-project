@@ -1,0 +1,87 @@
+{% extends 'pdapp/layout-no-side.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/faq.css' %}">
+    <title>FAQ</title>
+    <script src="{% static 'pdapp/JS/jquery-3.6.1.min.js' %}"></script>
+    <script src="{% static 'pdapp/JS/faq.js' %}"></script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="faq-section">
+        <h1 class="faq-headline">Frequently Asked Questions (FAQ)</h1>
+        <!-- TEST ENTRIES -->
+        <div class="faq-collapse">
+            <a data-bs-toggle="collapse" href="#collapseid1" role="button" aria-expanded="false" aria-controls="collapseExample">
+                <div class="collapse-area">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    <img src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt="" class="dropdown">
+                </div>
+            </a>
+            <div class="collapse mt-2" id="collapseid1">
+                <div class="card card-body">
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae, esse in. Veritatis deleniti quis provident temporibus, unde optio! Reprehenderit saepe culpa reiciendis iure, maxime qui obcaecati facilis voluptas, nobis modi fuga quae ad est sint optio repellendus quos totam nihil ea. Beatae, animi sed dolore laboriosam nesciunt est velit voluptates.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-collapse">
+            <a data-bs-toggle="collapse" href="#collapseid2" role="button" aria-expanded="false" aria-controls="collapseExample">
+                <div class="collapse-area">
+                    Lorem ipsum dolor sit, amet consectetur adipisicing elit. Fugit deserunt
+                    <img src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt="" class="dropdown">
+                </div>
+            </a>
+            <div class="collapse mt-2" id="collapseid2">
+                <div class="card card-body">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ea aliquam incidunt numquam nihil! Quaerat nisi perspiciatis impedit, id nihil eveniet? Ea illo pariatur eum nam veritatis ab nemo.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-collapse">
+            <a data-bs-toggle="collapse" href="#collapseid3" role="button" aria-expanded="false" aria-controls="collapseExample">
+                <div class="collapse-area">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+                    <img src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt="" class="dropdown">
+                </div>
+            </a>
+            <div class="collapse mt-2" id="collapseid3">
+                <div class="card card-body">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex quaerat magni iusto quisquam deserunt! Odit dignissimos numquam libero necessitatibus aliquid. Necessitatibus voluptatum vel, odit perferendis minus delectus sapiente nam hic quia neque esse eos pariatur, quas nisi ea officiis enim. Nostrum ratione repellat unde inventore cumque aut aliquam tenetur mollitia necessitatibus, autem voluptatem omnis, eveniet nulla fugit, sunt reprehenderit corrupti eum odit aspernatur dolor! Ex rerum voluptas autem, ipsum fuga pariatur aliquid beatae asperiores eveniet explicabo, ipsa delectus.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-collapse">
+            <a data-bs-toggle="collapse" href="#collapseid4" role="button" aria-expanded="false" aria-controls="collapseExample">
+                <div class="collapse-area">
+                    Lorem ipsum dolor sit amet.
+                    <img src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt="" class="dropdown">
+                </div>
+            </a>
+            <div class="collapse mt-2" id="collapseid4">
+                <div class="card card-body">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Corrupti reiciendis illum laborum dolor inventore corporis perferendis, praesentium esse qui nam suscipit ullam iusto quasi placeat!
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-collapse">
+            <a data-bs-toggle="collapse" href="#collapseid5" role="button" aria-expanded="false" aria-controls="collapseExample">
+                <div class="collapse-area">
+                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
+                    <img src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt="" class="dropdown">
+                </div>
+            </a>
+            <div class="collapse mt-2" id="collapseid5">
+                <div class="card card-body">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt quasi excepturi sint rem natus reiciendis corporis commodi perferendis, magni eum molestiae fugiat tempore sit nesciunt error doloremque quibusdam esse. Tempore repellat veniam est numquam saepe quos? Tempore dolores, voluptatem deserunt nesciunt quibusdam minima!
+                </div>
+            </div>
+        </div>
+        
+    </div>
+{% endblock %}

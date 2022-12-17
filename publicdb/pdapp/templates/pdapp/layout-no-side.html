@@ -11,17 +11,14 @@
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
     <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <!-- CSS -->
-    <link rel="stylesheet" href="{% static 'pdapp/CSS/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/layout-no-side.css' %}">
     {% block head %}
     {% endblock %}
-    <!-- JS -->
-    <script src="{% static 'pdapp/JS/jquery-3.6.1.min.js' %}"></script>
-    <script src="{% static 'pdapp/JS/layout.js' %}"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -58,61 +55,11 @@
                     </div>
                 </div>
             </nav>
-            <div class="headline-block">
-                <div class="headline-content">
-                    <div class="headline">
-                        <span>Open Data Management System</span>
-                    </div>
-                    <div class="headline-login">
-                        <div class="login">
-                            {% if logged %}
-                                <a href="{% url 'profile' %}" class="btn btn-danger open-login-form">Profile</a>
-                            {% else %}
-                                <a href="{% url 'login' %}" class="btn btn-danger open-login-form">Log in</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
         </header>
         <main>
             <div class="content">
-                <div class="sidebar">
-                    <div class="logo-details">
-                        <span class="logo-name">Dataset providers</span>
-                    </div>
-                    <div class="menu">
-                        <div class="menu-item">
-                            <a href="#" class="sub-button">Eurostat<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
-                            <div class="sub-menu">
-                                <a href="#" class="sub-item">Sub item 1</a>
-                                <a href="#" class="sub-item">Sub item 2</a>
-                                <a href="#" class="sub-item">Sub item 3</a>
-                            </div>
-                        </div>
-                        <div class="menu-item">
-                            <a href="#" class="sub-button">Statistics Iceland<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
-                            <div class="sub-menu">
-                                <a href="#" class="sub-item">Sub item 4</a>
-                                <a href="#" class="sub-item">Sub item 5</a>
-                                <a href="#" class="sub-item">Sub item 6</a>
-                            </div>
-                        </div>
-                        <div class="menu-item">
-                            <a href="#" class="sub-button">data.gov.ua<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
-                            <div class="sub-menu">
-                                <a href="#" class="sub-item">Sub item 7</a>
-                                <a href="#" class="sub-item">Sub item 8</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="main-content">
-                    {% block content %}
-                    {% endblock %}
-                </div>
-
+                {% block content %}
+                {% endblock %}
             </div>
         </main>
     </div>
