@@ -76,7 +76,18 @@
     width: 100%;
 }
 
+.error-block {
+    height: 30px;
+}
+
+#error {
+    color: var(--main-red);
+    font-size: 14px;
+    text-align: center;
+    margin-top: 5px;
+}
+
 #form-line {
-    margin-top: 30px;
+    margin-top: 0;
     margin-bottom: 10px;
 }

@@ -19,6 +19,11 @@
         </div>
         <div class="links-block"><p>Forgot your password? <a href="#">Click here</a></p></div>
         <button type="submit" class="btn btn-outline-danger" id="submit">LOGIN</button>
+        <div class="error-block">
+        {% if message %}
+            <p id="error">{{ message }}</p>
+        {% endif %}
+        </div>
         <hr id="form-line">
         <div class="links-block"><p>Not yet a user? <a href="{% url 'registration' %}">Sign up here</a></p></div>
     </form>
