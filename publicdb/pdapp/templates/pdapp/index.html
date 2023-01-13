@@ -12,32 +12,16 @@
         <h1 class="articles-headline">Latest added datasets</h1>
         <div class="articles-data">
             <ol class="list-group list-group-numbered">
+                {% for data in latestdatasets %}
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                     <div class="ms-2 me-auto">
-                        <div class="fw-bold"><a href="#">World Development Indicators</a></div>
-                        <div class="data-provider">World Economic Forum</div>
-                        This dataset contains the World Development Indicators (WDI).
+                        <div class="fw-bold"><a href="{% url 'dataset' data.id %}">{{ data.name }}</a></div>
+                        <div class="data-provider">{{ data.category }}</div>
+                        {{ data.description }}
                     </div>
-                    <span class="badge bg-danger rounded-pill">8</span>
+                    <span class="badge bg-danger rounded-pill">{{ data.datasetfiles.count }}</span>
                 </li>
-
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
-                        <div class="fw-bold"><a href="#">International Monetary Fund, World Economic Outlook</a></div>
-                        <div class="data-provider">The World Trade Organization (WTO)</div>
-                        International Monetary Fund, World Economic Outlook.
-                    </div>
-                    <span class="badge bg-danger rounded-pill">14</span>
-                </li>
-
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="ms-2 me-auto">
-                        <div class="fw-bold"><a href="#">Labor Productivity and Costs (Quarterly)</a></div>
-                        <div class="data-provider">International Telecommunication Union</div>
-                        Labor productivity and costs measures are from the Major Sector Productivity and Costs (PR) database.
-                    </div>
-                    <span class="badge bg-danger rounded-pill">5</span>
-                </li>
+                {% endfor %}
             </ol>
         </div>
     </div>

@@ -50,7 +50,7 @@
                             <!-- <li class="nav-item"><a class="nav-link disabled">Disabled</a></li> -->
                         </ul>
                         <form class="d-flex" role="search" action="{% url 'index' %}" method="get">
-                            <input class="form-control me-2" type="search" placeholder="Search datasets" aria-label="Search">
+                            <input class="form-control me-2" type="search" placeholder="Search datasets" aria-label="Search" name="search">
                             <button class="btn btn-outline-danger" id="search-button" type="submit">
                                 <div class="search-img-wrap"></div>
                             </button>
@@ -77,34 +77,22 @@
         </header>
         <main>
             <div class="content">
+                
                 <div class="sidebar">
                     <div class="logo-details">
-                        <span class="logo-name">Dataset providers</span>
+                        <span class="logo-name">Categories of datasets</span>
                     </div>
                     <div class="menu">
+                        {% for category in categories %}
                         <div class="menu-item">
-                            <a href="#" class="sub-button">Eurostat<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
+                            <a href="#" class="sub-button">{{ category.name }}<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
                             <div class="sub-menu">
-                                <a href="#" class="sub-item">Sub item 1</a>
-                                <a href="#" class="sub-item">Sub item 2</a>
-                                <a href="#" class="sub-item">Sub item 3</a>
+                                {% for dataset in category.datasets.all %}
+                                <a href="{% url 'dataset' dataset.id %}" class="sub-item">{{ dataset.name }}</a>
+                                {% endfor %}
                             </div>
                         </div>
-                        <div class="menu-item">
-                            <a href="#" class="sub-button">Statistics Iceland<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
-                            <div class="sub-menu">
-                                <a href="#" class="sub-item">Sub item 4</a>
-                                <a href="#" class="sub-item">Sub item 5</a>
-                                <a href="#" class="sub-item">Sub item 6</a>
-                            </div>
-                        </div>
-                        <div class="menu-item">
-                            <a href="#" class="sub-button">data.gov.ua<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
-                            <div class="sub-menu">
-                                <a href="#" class="sub-item">Sub item 7</a>
-                                <a href="#" class="sub-item">Sub item 8</a>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
 
