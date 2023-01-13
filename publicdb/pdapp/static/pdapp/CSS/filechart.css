@@ -1,0 +1,11 @@
+.headline-block > h1 {
+    font-weight: 600;
+}
+
+.headline-block > p {
+    font-size: 18px;
+}
+
+#chartfield {
+    border: 1px solid grey;
+}

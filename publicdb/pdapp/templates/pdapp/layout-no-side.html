@@ -11,17 +11,14 @@
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
     <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <!-- CSS -->
-    <link rel="stylesheet" href="{% static 'pdapp/CSS/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/layout-no-side.css' %}">
     {% block head %}
     {% endblock %}
-    <!-- JS -->
-    <script src="{% static 'pdapp/JS/jquery-3.6.1.min.js' %}"></script>
-    <script src="{% static 'pdapp/JS/layout.js' %}"></script>
 </head>
 <body>
     <div class="wrapper">
@@ -50,7 +47,7 @@
                             <!-- <li class="nav-item"><a class="nav-link disabled">Disabled</a></li> -->
                         </ul>
                         <form class="d-flex" role="search" action="{% url 'index' %}" method="get">
-                            <input class="form-control me-2" type="search" placeholder="Search datasets" aria-label="Search" name="search">
+                            <input class="form-control me-2" type="search" placeholder="Search datasets" aria-label="Search">
                             <button class="btn btn-outline-danger" id="search-button" type="submit">
                                 <div class="search-img-wrap"></div>
                             </button>
@@ -58,49 +55,11 @@
                     </div>
                 </div>
             </nav>
-            <div class="headline-block">
-                <div class="headline-content">
-                    <div class="headline">
-                        <span>Open Data Management System</span>
-                    </div>
-                    <div class="headline-login">
-                        <div class="login">
-                            {% if user.is_authenticated %}
-                                <a href="{% url 'profile' %}" class="btn btn-danger open-login-form">Profile</a>
-                            {% else %}
-                                <a href="{% url 'login' %}" class="btn btn-danger open-login-form">Log in</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
         </header>
         <main>
             <div class="content">
-                
-                <div class="sidebar">
-                    <div class="logo-details">
-                        <span class="logo-name">Categories of datasets</span>
-                    </div>
-                    <div class="menu">
-                        {% for category in categories %}
-                        <div class="menu-item">
-                            <a href="#" class="sub-button">{{ category.name }}<img class="dropdown" src="{% static 'pdapp/IMG/down-arrow.svg' %}" alt=""></a>
-                            <div class="sub-menu">
-                                {% for dataset in category.datasets.all %}
-                                <a href="{% url 'dataset' dataset.id %}" class="sub-item">{{ dataset.name }}</a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="main-content">
-                    {% block content %}
-                    {% endblock %}
-                </div>
-
+                {% block content %}
+                {% endblock %}
             </div>
         </main>
     </div>

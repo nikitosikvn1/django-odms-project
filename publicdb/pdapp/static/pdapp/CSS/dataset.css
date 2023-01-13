@@ -1,0 +1,15 @@
+:root {
+    --main-red: #ff5858;
+    --data-provider: #009933;
+}
+
+a {
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.data-provider {
+    font-size: 14px;
+    color: var(--data-provider);
+}

@@ -1,0 +1,26 @@
+{% extends 'pdapp/layout-no-side.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/dataset.css' %}">
+    <title>{{ datasetinf.name }}</title>
+{% endblock %}
+
+
+{% block content %}
+    <h1>{{ datasetinf.name }}</h1>
+    <p>{{ datasetinf.description }}</p>
+    <div class="datasetfiles-links">
+        <ol class="list-group list-group-numbered">
+            {% for file in datasetinf.datasetfiles.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold"><a href="{% url 'file' file.pk %}">{{ file.name }}</a></div>
+                    <div class="data-provider">{{ file.provider }}</div>
+                    {{ file.description }}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+{% endblock %}

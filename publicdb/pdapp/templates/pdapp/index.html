@@ -1,0 +1,28 @@
+{% extends 'pdapp/layout.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/index.css' %}">
+    <title>ODMS</title>
+{% endblock %}
+
+
+{% block content %}
+    <div class="articles">
+        <h1 class="articles-headline">Latest added datasets</h1>
+        <div class="articles-data">
+            <ol class="list-group list-group-numbered">
+                {% for data in latestdatasets %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold"><a href="{% url 'dataset' data.id %}">{{ data.name }}</a></div>
+                        <div class="data-provider">{{ data.category }}</div>
+                        {{ data.description }}
+                    </div>
+                    <span class="badge bg-danger rounded-pill">{{ data.datasetfiles.count }}</span>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+{% endblock %}

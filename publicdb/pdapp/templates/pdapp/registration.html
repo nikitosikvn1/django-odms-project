@@ -1,0 +1,22 @@
+{% extends 'pdapp/auth-layout.html' %}
+
+{% block head %}
+    <title>Registration</title>
+{% endblock %}
+
+
+{% block form %}
+    <h3 class="auth-headline">Welcome!</h3>
+    <form action="{% url 'registration' %}" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-floating mb-3">
+                {{ field }}
+                <label class="form-label">{{ field.label }}</label>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-outline-danger" id="submit">SIGN UP</button>
+        <hr id="form-line">
+        <div class="links-block"><p>Already registered? <a href="{% url 'login' %}">Log in</a></p></div>
+    </form>
+{% endblock %}
