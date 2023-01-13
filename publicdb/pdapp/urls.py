@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('dataset/<int:pk>/', views.DatasetView.as_view(), name='dataset'),
+    path('file/<int:pk>/', views.FileChartView.as_view(), name='file'),
 
     # INFO
     path('info/faq/', views.FaqView.as_view(), name='faq'),
