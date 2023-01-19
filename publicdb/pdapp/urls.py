@@ -9,10 +9,11 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('dataset/<int:pk>/', views.DatasetView.as_view(), name='dataset'),
     path('file/<int:pk>/', views.FileChartView.as_view(), name='file'),
-
     # INFO
     path('info/faq/', views.FaqView.as_view(), name='faq'),
-
+    # EXPORT
+    path('exportfile/xlsx/<int:pk>/', views.ExportXLSXView.as_view(), name='exportXLSX'),
+    path('exportfile/csv/<int:pk>/', views.ExportCSVView.as_view, name='exportCSV'),
     # API
     path('api/tabledata/<int:pk>/', views.TableDataAPIView.as_view(), name='tabledata')
 ]
