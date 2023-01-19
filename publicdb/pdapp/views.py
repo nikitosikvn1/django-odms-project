@@ -15,7 +15,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import RegistrationForm
+from .forms import RegistrationForm, DatasetFileUploadForm
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile
 
