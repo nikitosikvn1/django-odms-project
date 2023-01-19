@@ -1,3 +1,4 @@
+// GET DATA FROM API
 async function getData() {
     const curreentURL = window.location.href;
     const objID = parseInt(curreentURL.split('/')[4]);
@@ -11,6 +12,16 @@ async function getData() {
     return await data;
 }
 
+// CHANGE TABS
+function openTab(page) {
+    document.querySelectorAll('.tabcontent').forEach(element => {
+        element.style.display = 'none';
+    });
+
+    document.querySelector(`#${page}`).style.display = 'block';
+}
+
+// DRAW CHART
 function DrawChart(canvas, labels, values, typed='line') {
     const bcColor = [
         'rgba(255, 99, 132, 0.2)',
@@ -54,9 +65,37 @@ function DrawChart(canvas, labels, values, typed='line') {
     });
 }
 
+// DRAW TABLE
+function DrawTable(data) {
+    const table = document.querySelector('#df-content');
+
+    for(let i = 0; i < data.length; i++) {
+        const row = document.createElement("tr");
+  
+        for (let element of data[i]) {
+            const data = document.createElement("td");
+            data.innerHTML = element;
+            row.appendChild(data);
+        }
+
+        table.appendChild(row);
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    openTab('Chart');
+
+    document.querySelectorAll('.tablink').forEach(button => {
+        button.addEventListener('click', () => {
+            console.log(button.dataset.page);
+            openTab(button.dataset.page);
+        });
+    });
+
     const chartObj = document.querySelector('#chartfield').getContext('2d');
     const cData = getData().then((data) => {
         DrawChart(chartObj, data.labels, data.values);
+        DrawTable([data.labels, data.values]);
     });
 });

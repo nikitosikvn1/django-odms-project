@@ -15,8 +15,20 @@
         <h1>{{ datasetfile.name }}</h1>
         <p>{{ datasetfile.description }}</p>
     </div>
-
-    <div class="chart-block">
-        <canvas width="1152px" height="720" id="chartfield"></canvas>
+    <div class="content-center">
+        <div class="tab-control">
+            <button class="tablink" data-page="Chart">Chart</button>
+            <button class="tablink" data-page="Table">Table</button>
+        </div>
+        
+        <div id="Chart" class="tabcontent">
+            <canvas width="1152px" height="720" id="chartfield"></canvas>
+        </div>
+          
+        <div id="Table" class="tabcontent"> 
+            <table id="df-content">
+                
+            </table>
+        </div>
     </div>
 {% endblock %}

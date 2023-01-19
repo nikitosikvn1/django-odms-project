@@ -1,8 +1,9 @@
 import csv
+from openpyxl import Workbook
 
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +16,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import RegistrationForm
+from .forms import RegistrationForm, DatasetFileUploadForm
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile
 
@@ -114,7 +115,49 @@ class FaqView(TemplateView):
 class ProfileView(TemplateView):
     template_name = "pdapp/profile.html"
 
+# EXPORT VIEW
 
+class ExportXLSXView(View):
+    def get(self, request, pk):
+        obj = get_object_or_404(DatasetFile, pk=pk)
+        path = obj.file_csv.path
+
+        wb = Workbook()
+        ws = wb.active
+        ws.append(['Info:', obj.name, obj.description, obj.provider])
+
+        with open(path, newline='') as csvfile:
+            content = list(csv.reader(csvfile))
+
+            for row in content:
+                ws.append(row)
+
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename={obj.name}.xlsx'
+
+        wb.save(response)
+        return response
+
+
+class ExportCSVView(View):
+    def get(self, request, pk):
+        obj = get_object_or_404(DatasetFile, pk=pk)
+        path = obj.file_csv.path
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{obj.name}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Info:', obj.name, obj.description, obj.provider])
+
+        with open(path, newline='') as csvfile:
+            content = list(csv.reader(csvfile))
+
+            for row in content:
+                writer.writerow(row)
+    
+        return response
+    
 # API VIEWS
 
 class TableDataAPIView(APIView):
