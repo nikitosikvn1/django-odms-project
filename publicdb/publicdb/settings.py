@@ -60,7 +60,7 @@ DATABASES = {
         'NAME': config('NAMEDB'),
         'USER': config('USERDB'),
         'PASSWORD': config('PASSWORDDB'),
-        'HOST': '127.0.0.1',
+        'HOST': 'postgresql_db',
         'PORT': '5432',
     }
 }
