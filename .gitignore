@@ -139,3 +139,6 @@ GitHub.sublime-settings
 # Tables
 *.csv
 *.CSV
+
+# Folders
+data/
