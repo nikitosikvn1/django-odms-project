@@ -68,7 +68,7 @@
                             {% if user.is_authenticated %}
                                 <a href="{% url 'profile' %}" class="btn btn-danger open-login-form">Profile</a>
                             {% else %}
-                                <a href="{% url 'login' %}" class="btn btn-danger open-login-form">Log in</a>
+                                <a href="{% url 'auth' %}" class="btn btn-danger open-login-form">Log in</a>
                             {% endif %}
                         </div>
                     </div>

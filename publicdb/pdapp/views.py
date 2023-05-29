@@ -6,6 +6,8 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q
@@ -16,7 +18,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import RegistrationForm, DatasetFileUploadForm
+from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile
 
@@ -43,49 +45,62 @@ class IndexView(TemplateView):
 
 
 @method_decorator(unauthenticated_user, name='dispatch')
-@method_decorator(csrf_exempt, name='dispatch')
-class RegistrationView(View):
+class RegistrationAndLoginView(View):
 
     def get(self, request):
-        form = RegistrationForm()
-        return render(request, "pdapp/registration.html", {'form': form})
+        registration_form = RegistrationForm()
+        login_form = CustomAuthenticationForm()
 
+        return render(request, "pdapp/registration_and_login.html", {
+            'registration_form': registration_form,
+            'login_form': login_form,
+        })
+    
     def post(self, request):
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.save()
+        if 'register' in request.POST:
+            registration_form = RegistrationForm(request.POST)
+            login_form = CustomAuthenticationForm()
 
-            user = authenticate(request, username=user.username, password=request.POST["password1"])
-            if user is not None:
-                login(request, user)
-                return HttpResponseRedirect(reverse('index'))
-
-        return render(request, "pdapp/registration.html", {'form': form})
-
-
-@method_decorator(unauthenticated_user, name='dispatch')
-@method_decorator(csrf_exempt, name='dispatch')
-class LoginView(View):
-
-    def get(self, request):
-        return render(request, "pdapp/login.html")
-
-    def post(self, request):
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse('index'))
+            if registration_form.is_valid():
+                with transaction.atomic():
+                    user = registration_form.save(commit=False)
+                    user.save()
+                    user = authenticate(
+                        request,
+                        username=user.username,
+                        password=request.POST["password1"],
+                    )
+                    if user is not None:
+                        login(request, user)
+                        messages.success(request, "Successfully registered and logged in.")
+                        return HttpResponseRedirect(reverse('index'))
+            else:
+                messages.error(request, 'Please correct the errors in the registration form.')
         else:
-            return render(request, "pdapp/login.html", {
-                "message": "Invalid credentials."
-            })
+            registration_form = RegistrationForm()
+        
+        if 'login' in request.POST:
+            login_form = CustomAuthenticationForm(data=request.POST)
+            registration_form = RegistrationForm()
+            
+            if login_form.is_valid():
+                user = login_form.get_user()
+                login(request, user)
+                messages.success(request, "Successfully logged in.")
+                return HttpResponseRedirect(reverse('index'))
+            else:
+                messages.error(request, 'Invalid username or password.')
+        else:
+            login_form = CustomAuthenticationForm()
+        
+        return render(request, "pdapp/registration_and_login.html", {
+            'registration_form': registration_form,
+            'login_form': login_form,
+        })
+
 
 class LogoutView(RedirectView):
-    url = reverse_lazy('login')
+    url = reverse_lazy('auth')
 
     def get(self, request, *args, **kwargs):
         logout(request)
@@ -115,7 +130,7 @@ class FaqView(TemplateView):
 class ProfileView(TemplateView):
     template_name = "pdapp/profile.html"
 
-# EXPORT VIEW
+# EXPORT VIEWS
 
 class ExportXLSXView(View):
     def get(self, request, pk):
