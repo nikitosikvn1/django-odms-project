@@ -3,7 +3,7 @@ from openpyxl import Workbook
 
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 
 from django.views.generic import View, TemplateView, DetailView, RedirectView
+from django.contrib.auth.views import LogoutView as AuthLogoutView
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -99,7 +100,7 @@ class RegistrationAndLoginView(View):
         if 'login' in request.POST:
             login_form = CustomAuthenticationForm(data=request.POST)
             registration_form = RegistrationForm()
-            
+
             if login_form.is_valid():
                 user = login_form.get_user()
                 login(request, user)
@@ -116,12 +117,8 @@ class RegistrationAndLoginView(View):
         })
 
 
-class LogoutView(RedirectView):
-    url = reverse_lazy('auth')
-
-    def get(self, request, *args, **kwargs):
-        logout(request)
-        return super().get(request, *args, **kwargs)
+class LogoutView(AuthLogoutView):
+    next_page = reverse_lazy('auth')
 
 
 #@method_decorator(allowed_users(["Analyst"]), name='dispatch')
@@ -151,6 +148,11 @@ class ProfileView(TemplateView):
 
 class ExportXLSXView(View):
     def get(self, request, pk):
+        try:
+            pk = int(pk)
+        except ValueError:
+            raise Http404("Invalid dataset file ID")
+
         obj = get_object_or_404(DatasetFile, pk=pk)
         path = obj.file_csv.path
 
@@ -158,21 +160,36 @@ class ExportXLSXView(View):
         ws = wb.active
         ws.append(['Info:', obj.name, obj.description, obj.provider])
 
-        with open(path, newline='') as csvfile:
-            content = list(csv.reader(csvfile))
+        try:
+            with open(path, newline='') as csvfile:
+                content = list(csv.reader(csvfile))
 
-            for row in content:
-                ws.append(row)
+                if not content:
+                    raise ValueError("The CSV file is empty")
+
+                for row in content:
+                    ws.append(row)
+        except Exception as e:
+            return HttpResponse(f"Error processing the file: {e}", status=500)
 
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename={obj.name}.xlsx'
 
-        wb.save(response)
+        try:
+            wb.save(response)
+        except Exception as e:
+            return HttpResponse(f"Error saving the file: {e}", status=500)
+
         return response
 
 
 class ExportCSVView(View):
     def get(self, request, pk):
+        try:
+            pk = int(pk)
+        except ValueError:
+            raise Http404("Invalid dataset file ID")
+
         obj = get_object_or_404(DatasetFile, pk=pk)
         path = obj.file_csv.path
 
@@ -182,12 +199,18 @@ class ExportCSVView(View):
         writer = csv.writer(response)
         writer.writerow(['Info:', obj.name, obj.description, obj.provider])
 
-        with open(path, newline='') as csvfile:
-            content = list(csv.reader(csvfile))
+        try:
+            with open(path, newline='') as csvfile:
+                content = list(csv.reader(csvfile))
 
-            for row in content:
-                writer.writerow(row)
-    
+                if not content:
+                    raise ValueError("The CSV file is empty")
+
+                for row in content:
+                    writer.writerow(row)
+        except Exception as e:
+            return HttpResponse(f"Error processing the file: {e}", status=500)
+
         return response
     
 # API VIEWS
