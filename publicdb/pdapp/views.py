@@ -1,6 +1,3 @@
-import csv
-from openpyxl import Workbook
-
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
@@ -23,6 +20,12 @@ from rest_framework.views import APIView
 from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile
+
+import csv
+import matplotlib.pyplot as plt
+import seaborn as sns
+from io import BytesIO
+from openpyxl import Workbook
 
 # Create your views here.
 
@@ -211,6 +214,40 @@ class ExportCSVView(View):
         except Exception as e:
             return HttpResponse(f"Error processing the file: {e}", status=500)
 
+        return response
+
+
+class ExportPlotView(View):
+    def get(self, request, pk):
+        obj = get_object_or_404(DatasetFile, pk=pk)
+        path = obj.file_csv.path
+
+        try:
+            with open(path, 'r') as f:
+                reader = csv.reader(f)
+                labels = next(reader)
+                values = next(reader)
+
+            if not labels or not values:
+                raise ValueError('Empty labels or values')
+
+            values = [float(val) for val in values]
+        except Exception as e:
+            raise Http404('Cannot read data from file: ' + str(e))
+
+        sns.set_theme(style="darkgrid")
+        fig, ax = plt.subplots()
+        ax.plot(labels, values)
+        ax.set_title(f"{obj.name} Plot", fontsize=14, fontweight='bold')
+        ax.set_xlabel('Labels', fontsize=12)
+        ax.set_ylabel('Values', fontsize=12)
+        plt.xticks(rotation=45, fontsize=3) 
+
+        buf = BytesIO()
+        plt.savefig(buf, format='png', dpi=300)
+        plt.close(fig)
+
+        response = HttpResponse(buf.getvalue(), content_type='image/png')
         return response
     
 # API VIEWS
