@@ -11,6 +11,7 @@ from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 from django.views.generic import View, TemplateView, DetailView, RedirectView
 
@@ -29,20 +30,36 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         search_query = self.request.GET.get("search")
+        latestdatasets, header = self.get_datasets(search_query)
 
-        if search_query:
-            latestdatasets = Dataset.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
-            header = f"Search results for: '{search_query}'"
-        else:
-            latestdatasets = Dataset.objects.order_by('-id')[:10]
-            header = "Recent questions"
-
-        context['categories'] = Category.objects.all()[:5] 
+        context['categories'] = self.get_categories()
         context['latestdatasets'] = latestdatasets
         context['header'] = header
         return context
 
+    def get_datasets(self, search_query):
+        datasets = Dataset.objects.select_related('category')
+
+        if search_query:
+            datasets = datasets.filter(
+                Q(name__icontains=search_query) | Q(description__icontains=search_query)
+            )
+            header = f"Search results for: '{search_query}'"
+        else:
+            datasets = datasets.order_by('-id')[:10]
+            header = "Recent questions"
+
+        paginator = Paginator(datasets, 10)
+        page_number = self.request.GET.get('page')
+        datasets = paginator.get_page(page_number)
+
+        return datasets, header
+
+    def get_categories(self):
+        return Category.objects.all()[:5]
+    
 
 @method_decorator(unauthenticated_user, name='dispatch')
 class RegistrationAndLoginView(View):

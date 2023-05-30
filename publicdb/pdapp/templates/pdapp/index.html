@@ -24,5 +24,19 @@
                 {% endfor %}
             </ol>
         </div>
+        
+        <div class="pagination">
+            {% if latestdatasets.has_previous %}
+                <a href="?search={{ request.GET.search }}&page=1">&laquo; first</a>
+                <a href="?search={{ request.GET.search }}&page={{ latestdatasets.previous_page_number }}">previous</a>
+            {% endif %}
+        
+            <span class="current">Page {{ latestdatasets.number }} of {{ latestdatasets.paginator.num_pages }}</span>
+        
+            {% if latestdatasets.has_next %}
+                <a href="?search={{ request.GET.search }}&page={{ latestdatasets.next_page_number }}">next</a>
+                <a href="?search={{ request.GET.search }}&page={{ latestdatasets.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
