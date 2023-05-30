@@ -1,5 +1,6 @@
 :root {
     --main-red: #ff5858;
+    --main-blue: #004dff;
     --nav-background: #f8f9fa;
     --border-color: #ebebeb;
     --hover-pink: #ffe1e1;
@@ -15,7 +16,7 @@ header {
 }
 
 #main-logo {
-    width: 108px;
+    width: 60px;
     height: auto;
 }
 
