@@ -1,8 +1,15 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from unittest.mock import Mock
-from .models import Category, Dataset, DatasetFile
-from django.contrib.auth.models import User
+from django.core.handlers.wsgi import WSGIRequest
+from django.http import HttpResponseRedirect, HttpResponse
+from django.urls import reverse
+from django.shortcuts import render
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+from django.contrib.auth.models import User, AnonymousUser, Group
+from .models import Category, Dataset, DatasetFile
+from .decorators import unauthenticated_user, allowed_users
+
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 
@@ -109,3 +116,86 @@ class DatasetFileModelRelationshipTest(TestCase):
     def test_user_deletion(self):
         with self.assertRaises(ProtectedError):
             self.user.delete()
+
+
+# ------------------------------
+# --------> DECORATORS <--------
+# ------------------------------
+class UnauthenticatedUserDecoratorTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(username='test', password='12345')
+
+    def test_decorator_with_unauthenticated_user(self):
+        
+        @unauthenticated_user
+        def mock_view(request):
+            return 'Hello, world!'
+
+        request = self.factory.get('/fake-path')
+        request.user = AnonymousUser()
+        response = mock_view(request)
+
+        self.assertEqual(response, 'Hello, world!')
+
+    def test_decorator_with_authenticated_user(self):
+
+        @unauthenticated_user
+        def mock_view(request):
+            return 'Hello, world!'
+
+        request = self.factory.get('/fake-path')
+        request.user = self.user
+        response = mock_view(request)
+
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertEqual(response.url, reverse('index'))
+
+
+class AllowedUsersDecoratorTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(username='test', password='12345')
+        self.group1 = Group.objects.create(name='group1')
+        self.group2 = Group.objects.create(name='group2')
+
+    def test_decorator_with_allowed_group(self):
+
+        @allowed_users(allowed_roles=['group1'])
+        def mock_view(request):
+            return HttpResponse('Hello, world!')
+
+        self.group1.user_set.add(self.user)
+        
+        request = self.factory.get('/fake-path')
+        request.user = self.user
+        response = mock_view(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content.decode(), 'Hello, world!')
+
+    def test_decorator_with_unallowed_group(self):
+
+        @allowed_users(allowed_roles=['group1'])
+        def mock_view(request):
+            return HttpResponse('Hello, world!')
+
+        self.group2.user_set.add(self.user)
+        
+        request = self.factory.get('/fake-path')
+        request.user = self.user
+        response = mock_view(request)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_decorator_with_no_group(self):
+
+        @allowed_users(allowed_roles=['group1'])
+        def mock_view(request):
+            return HttpResponse('Hello, world!')
+
+        request = self.factory.get('/fake-path')
+        request.user = self.user
+        response = mock_view(request)
+
+        self.assertEqual(response.status_code, 403)
