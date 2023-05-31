@@ -66,6 +66,20 @@ DATABASES = {
 }
 
 
+SESSION_ENGINE = 'redis_sessions.session'
+
+SESSION_REDIS = {
+    'host': 'redis',
+    'port': 6379,
+    'db': 0,
+    'password': config('REDIS_PASSWD'),
+    'prefix': 'session',
+    'socket_timeout': 1,
+    'retry_on_timeout': False
+}
+
+SESSION_COOKIE_AGE = 86400
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
