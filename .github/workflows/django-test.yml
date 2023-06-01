@@ -1,0 +1,43 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      NAMEDB: ${{ secrets.NAMEDB }}
+      USERDB: ${{ secrets.USERDB }}
+      PASSWORDDB: ${{ secrets.PASSWORDDB }}
+      REDIS_PASSWD: ${{ secrets.REDIS_PASSWD }}
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Install Docker Compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.18.1'
+
+      - name: Run Docker Compose
+        run: |
+          set -e
+          docker compose -f ./publicdb/docker-compose.yml up --build -d
+          sleep 10
+      
+      - name: Display container logs
+        run: docker logs publicdb-django_app-1
+
+      - name: Run tests
+        run: |
+          docker exec publicdb-django_app-1 python manage.py test -v 2

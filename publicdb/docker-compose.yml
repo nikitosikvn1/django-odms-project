@@ -19,6 +19,11 @@ services:
     environment:
       DEBUG: "true"
       DATABASE_URL: "postgresql://nikitap:${PASSWORDDB}@postgresql_db:5432/pdapp"
+      SECRET_KEY: ${SECRET_KEY}
+      NAMEDB: ${NAMEDB}
+      USERDB: ${USERDB}
+      PASSWORDDB: ${PASSWORDDB}
+      REDIS_PASSWD: ${REDIS_PASSWD}
     volumes:
       - .:/app
     ports:
