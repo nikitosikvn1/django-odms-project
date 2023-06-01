@@ -9,9 +9,22 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import User, AnonymousUser, Group
 from .models import Category, Dataset, DatasetFile
 from .decorators import unauthenticated_user, allowed_users
+from .validators import validate_csv_file
+from publicdb.settings import MEDIA_ROOT
 
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
+import os
+
+
+def delete_test_entries():
+    directory = f"{MEDIA_ROOT}/csv"
+    if os.path.exists(directory):
+        test_files = [f for f in os.listdir(directory) if f.startswith('test')]
+        for file in test_files:
+            file_path = os.path.join(directory, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
 
 # ------------------------------
 # ----------> MODELS <----------
@@ -72,6 +85,9 @@ class DatasetFileModelTest(TestCase):
                 file_csv=SimpleUploadedFile('testfile2.txt', file_content)
             )
             dataset_file.full_clean()
+    
+    def tearDown(self):
+        delete_test_entries()
 
 
 class DatasetModelRelationshipTest(TestCase):
@@ -116,6 +132,9 @@ class DatasetFileModelRelationshipTest(TestCase):
     def test_user_deletion(self):
         with self.assertRaises(ProtectedError):
             self.user.delete()
+    
+    def tearDown(self):
+        delete_test_entries()
 
 
 # ------------------------------
@@ -127,7 +146,7 @@ class UnauthenticatedUserDecoratorTests(TestCase):
         self.user = User.objects.create_user(username='test', password='12345')
 
     def test_decorator_with_unauthenticated_user(self):
-        
+
         @unauthenticated_user
         def mock_view(request):
             return 'Hello, world!'
@@ -199,3 +218,18 @@ class AllowedUsersDecoratorTests(TestCase):
         response = mock_view(request)
 
         self.assertEqual(response.status_code, 403)
+
+
+# ------------------------------
+# --------> VALIDATORS <--------
+# ------------------------------
+class ValidateCSVFileTest(TestCase):
+    def test_validate_csv_file_valid_extension(self):
+        valid_file = SimpleUploadedFile("file.csv", b"file_content", content_type="text/csv")
+        validate_csv_file(valid_file)
+
+    def test_validate_csv_file_invalid_extension(self):
+        invalid_file = SimpleUploadedFile("file.txt", b"file_content", content_type="text/plain")
+
+        with self.assertRaises(ValidationError):
+            validate_csv_file(invalid_file)
