@@ -114,8 +114,9 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = BASE_DIR / "dbfiles"
 MEDIA_URL = '/csv/'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 if 'test' in sys.argv:
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    print('Using standard static file storage during tests')
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+    SESSION_COOKIE_AGE = 10
+    print('Using standard static file storage and test sessions during tests')

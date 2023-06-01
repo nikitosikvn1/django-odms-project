@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.shortcuts import render
 from django.core.files.uploadedfile import SimpleUploadedFile
+from redis_sessions.session import SessionStore as RedisSessionStore
 
 from django.contrib.auth.models import User, AnonymousUser, Group
 from .models import Category, Dataset, DatasetFile
@@ -298,3 +299,32 @@ class URLTests(TestCase):
     
     def tearDown(self):
         delete_test_entries()
+
+
+# Integration test to check the interaction between Django and Redis.
+# I didn't do any complex Redis setup, so the test is more of a demo.
+class RedisSessionTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='12345')
+
+    def test_redis_session_on_login(self):
+        response = self.client.post(reverse('auth'), {
+            'username': 'testuser',
+            'password': '12345',
+            'login': '',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        session_key = self.client.session.session_key
+        redis_session_store = RedisSessionStore(session_key=session_key)
+        session_data = redis_session_store.load()
+
+        self.assertTrue(session_data)
+        self.assertEqual(session_data.get('_auth_user_id'), str(self.user.pk))
+    
+    def tearDown(self):
+        session_key = self.client.session.session_key
+        if session_key:
+            redis_session_store = RedisSessionStore(session_key=session_key)
+            redis_session_store.delete()
