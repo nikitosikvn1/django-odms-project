@@ -1,4 +1,4 @@
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
 from unittest.mock import Mock
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponseRedirect, HttpResponse
@@ -16,8 +16,8 @@ from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 import os
 
-
-def delete_test_entries():
+# Function to delete files created during tests
+def delete_test_entries() -> None:
     directory = f"{MEDIA_ROOT}/csv"
     if os.path.exists(directory):
         test_files = [f for f in os.listdir(directory) if f.startswith('test')]
@@ -233,3 +233,68 @@ class ValidateCSVFileTest(TestCase):
 
         with self.assertRaises(ValidationError):
             validate_csv_file(invalid_file)
+
+
+# ------------------------------
+# --------> URL ROUTES <--------
+# ------------------------------
+class URLTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.file = SimpleUploadedFile("testfile.csv", b"a,b\n1,2", content_type="text/csv")
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.category = Category.objects.create(name='TestCategory')
+        self.dataset = Dataset.objects.create(name='TestDataset', description='TestDescription', category=self.category)
+        self.datasetfile = DatasetFile.objects.create(
+            name='TestFile',
+            description='Test file description',
+            file_csv=self.file,
+            dataset=self.dataset,
+            created_by=self.user,
+            provider='TestProvider',
+        )
+
+    def test_index_view(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_auth_view(self):
+        response = self.client.get(reverse('auth'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_logout_view(self):
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(reverse('logout'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_profile_view(self):
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(reverse('profile'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_dataset_view(self):
+        response = self.client.get(reverse('dataset', kwargs={'pk': self.dataset.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_file_view(self):
+        response = self.client.get(reverse('file', kwargs={'pk': self.datasetfile.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_faq_view(self):
+        response = self.client.get(reverse('faq'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_export_xlsx_view(self):
+        response = self.client.get(reverse('exportXLSX', kwargs={'pk': self.datasetfile.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_export_csv_view(self):
+        response = self.client.get(reverse('exportCSV', kwargs={'pk': self.datasetfile.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_export_plot_view(self):
+        response = self.client.get(reverse('exportPlot', kwargs={'pk': self.datasetfile.pk}))
+        self.assertEqual(response.status_code, 200)
+    
+    def tearDown(self):
+        delete_test_entries()

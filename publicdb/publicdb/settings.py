@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from decouple import config
 
@@ -107,10 +108,14 @@ USE_TZ = True
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = '/static/'
 
 MEDIA_ROOT = BASE_DIR / "dbfiles"
-MEDIA_URL = 'csv/'
+MEDIA_URL = '/csv/'
+
+if 'test' in sys.argv:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    print('Using standard static file storage during tests')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
