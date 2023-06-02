@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.shortcuts import render
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import Q
 from redis_sessions.session import SessionStore as RedisSessionStore
 
 from django.contrib.auth.models import User, AnonymousUser, Group
@@ -141,7 +142,7 @@ class DatasetFileModelRelationshipTest(TestCase):
 # ------------------------------
 # --------> DECORATORS <--------
 # ------------------------------
-class UnauthenticatedUserDecoratorTests(TestCase):
+class UnauthenticatedUserDecoratorTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.create_user(username='test', password='12345')
@@ -172,7 +173,7 @@ class UnauthenticatedUserDecoratorTests(TestCase):
         self.assertEqual(response.url, reverse('index'))
 
 
-class AllowedUsersDecoratorTests(TestCase):
+class AllowedUsersDecoratorTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.user = User.objects.create_user(username='test', password='12345')
@@ -328,3 +329,72 @@ class RedisSessionTest(TestCase):
         if session_key:
             redis_session_store = RedisSessionStore(session_key=session_key)
             redis_session_store.delete()
+
+
+# ------------------------------
+# ----------> VIEWS <-----------
+# ------------------------------
+class IndexViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.categories = [
+            Category.objects.create(name=f"Category {i}", hex_code="#ffffff")
+            for i in range(6)
+        ]
+
+        self.datasets = [
+            Dataset.objects.create(
+                name=f"Dataset {i}", 
+                description=f"Description for Dataset {i}", 
+                category=self.categories[i%5]
+            ) for i in range(20)
+        ]
+
+    def test_get_categories(self):
+        response = self.client.get(reverse("index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertQuerysetEqual(response.context["categories"], Category.objects.all().order_by('id')[:5], transform=lambda x: x)
+
+    def test_get_datasets_with_search(self):
+        response = self.client.get(reverse("index"), {"search": "1"})
+        header_context = response.context["header"]
+        datasets_context = response.context["latestdatasets"]
+
+        expected_queryset = Dataset.objects.filter(Q(name__icontains='1') | Q(description__icontains='1'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(header_context, "Search results for: '1'")
+        self.assertEqual(len(datasets_context), min(10, len(expected_queryset)))
+        self.assertQuerysetEqual(datasets_context, expected_queryset[:10], transform=lambda x: x)
+
+    def test_get_datasets_with_search_second_page(self):
+        response = self.client.get(reverse("index"), {"search": "1", "page": "2"})
+        datasets_context = response.context["latestdatasets"]
+
+        expected_queryset = Dataset.objects.filter(Q(name__icontains='1') | Q(description__icontains='1'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(datasets_context), min(10, max(0, len(expected_queryset) - 10)))
+        self.assertQuerysetEqual(datasets_context, expected_queryset[10:20], transform=lambda x: x)
+
+    def test_get_datasets_without_search(self):
+        response = self.client.get(reverse("index"))
+        header_context = response.context["header"]
+        datasets_context = response.context["latestdatasets"]
+
+        expected_queryset = Dataset.objects.all().order_by('-id')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(header_context, "Recent questions")
+        self.assertEqual(len(datasets_context), min(10, len(expected_queryset)))
+        self.assertQuerysetEqual(datasets_context, expected_queryset[:10], transform=lambda x: x)
+
+    def test_no_datasets(self):
+        Dataset.objects.all().delete()
+
+        response = self.client.get(reverse("index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["latestdatasets"]), 0)
