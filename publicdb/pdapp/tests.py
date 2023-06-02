@@ -6,11 +6,14 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
+from django.contrib import auth
+from django.contrib.messages import get_messages
 from redis_sessions.session import SessionStore as RedisSessionStore
 
 from django.contrib.auth.models import User, AnonymousUser, Group
 from .models import Category, Dataset, DatasetFile
 from .decorators import unauthenticated_user, allowed_users
+from .forms import RegistrationForm, CustomAuthenticationForm
 from .validators import validate_csv_file
 from publicdb.settings import MEDIA_ROOT
 
@@ -398,3 +401,135 @@ class IndexViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context["latestdatasets"]), 0)
+
+
+class RegistrationAndLoginViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.data = {
+            'register': True,
+            'username': 'testuser2',
+            'email': 'testuser@example.com',
+            'password1': 'Qatar1221!',
+            'password2': 'Qatar1221!',
+        }
+
+    def test_get_request(self):
+        response = self.client.get(reverse('auth'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['registration_form'], RegistrationForm)
+        self.assertIsInstance(response.context['login_form'], CustomAuthenticationForm)
+
+    def test_register_post_request(self):
+        response = self.client.post(reverse('auth'), data=self.data)
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.filter(username=self.data['username']).exists())
+        self.assertEqual(response.url, reverse('index'))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Successfully registered and logged in.")
+
+    def test_invalid_register_post_request(self):
+        invalid_data = self.data.copy()
+        invalid_data['password2'] = 'differentpassword'
+        response = self.client.post(reverse('auth'), data=invalid_data)
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username=invalid_data['username']).exists())
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Please correct the errors in the registration form.")
+
+    def test_login_post_request(self):
+        login_data = {
+            'login': True,
+            'username': 'testuser',
+            'password': '12345'
+        }
+        
+        response = self.client.post(reverse('auth'), data=login_data)
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('index'))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Successfully logged in.")
+
+    def test_invalid_login_post_request(self):
+        login_data = {
+            'login': True,
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+
+        response = self.client.post(reverse('auth'), data=login_data)
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Invalid username or password.")
+    
+    def test_post_request_without_login_or_register(self):
+        response = self.client.post(reverse('auth'), data={})
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(messages), 0)
+        self.assertIsInstance(response.context['registration_form'], RegistrationForm)
+        self.assertIsInstance(response.context['login_form'], CustomAuthenticationForm)
+    
+    # here we assume that registration takes precedence over login
+    def test_register_and_login_post_request(self):
+        self.data['login'] = True
+        response = self.client.post(reverse('auth'), data=self.data)
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(User.objects.filter(username=self.data['username']).exists())
+        self.assertEqual(response.url, reverse('index'))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Successfully registered and logged in.")
+        self.data.pop('login')
+    
+    def test_register_existing_user(self):
+        existing_user_data = {
+            'register': True,
+            'username': 'testuser',
+            'email': 'testuser@example.com',
+            'password1': '12345',
+            'password2': '12345',
+        }
+
+        response = self.client.post(reverse('auth'), data=existing_user_data)
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Please correct the errors in the registration form.")
+    
+    def test_successful_login_authenticates_user(self):
+        login_data = {
+            'login': True,
+            'username': 'testuser',
+            'password': '12345'
+        }
+
+        _ = self.client.post(reverse('auth'), data=login_data)
+        user = auth.get_user(self.client)
+
+        self.assertTrue(user.is_authenticated)
+        self.assertEqual(user.username, login_data['username'])
+    
+    def test_unauthenticated_user_access(self):
+        response = self.client.get(reverse('auth'))
+        self.assertEqual(response.status_code, 200)
+    
+    def test_authenticated_user_access(self):
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(reverse('auth'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('index'))
