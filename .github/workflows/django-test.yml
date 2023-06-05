@@ -2,9 +2,12 @@ name: Django CI
 
 on:
   push:
-    branches: [ dev ]
+    branches:
+      - dev 
   pull_request:
-    branches: [ main ]
+    branches:
+      - dev
+      - main
 
 jobs:
   build-and-test:
@@ -20,6 +23,13 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      
+      - name: Merge base branch 'dev'
+        run: |
+          git fetch origin dev:dev
+          git merge dev
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
