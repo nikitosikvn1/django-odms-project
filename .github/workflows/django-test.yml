@@ -28,8 +28,9 @@ jobs:
       
       - name: Merge base branch 'dev'
         run: |
-          git fetch origin dev:dev
-          git merge dev
+          git fetch origin dev
+          DEV_SHA=$(git rev-parse origin/dev)
+          git merge $DEV_SHA
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
