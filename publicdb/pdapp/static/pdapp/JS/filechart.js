@@ -1,18 +1,76 @@
-// GET DATA FROM API
 async function getData() {
-    const curreentURL = window.location.href;
-    const objID = parseInt(curreentURL.split("/")[4]);
+    const currentURL = window.location.href;
+    const objID = parseInt(currentURL.split("/")[4]);
 
-    const data = fetch(`/api/tabledata/${objID}/`)
-        .then((Response) => Response.json())
-        .catch((Error) => {
-            console.log("Error: ", Error);
-        });
+    if (isNaN(objID)) {
+        throw new Error("Invalid URL: can't extract object ID");
+    }
 
-    return await data;
+    try {
+        const response = await fetch(`/api/tabledata/${objID}/`);
+        if (!response.ok) {
+            throw new Error(
+                `Network response was not ok: ${response.statusText}`
+            );
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`Fetch Error: ${error}`);
+        throw error;
+    }
 }
 
-// CHANGE TABS
+function drawTable(data, table) {
+    const numOfFields = data.length;
+
+    for (let i = 0; i < numOfFields; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = 0; j < data[i].length; j++) {
+            const td = document.createElement("td");
+
+            if (i == 1) td.setAttribute("data-value", `${data[i][j]}`);
+
+            td.innerHTML = data[i][j];
+            row.appendChild(td);
+        }
+        table.appendChild(row);
+    }
+}
+
+function editTable(table) {
+    table.addEventListener("click", (e) => {
+        const activeTd = e.target;
+
+        if (activeTd.querySelector("input")) {
+            return;
+        }
+
+        const input = document.createElement("input");
+        input.value = activeTd.innerHTML;
+        activeTd.innerHTML = "";
+        activeTd.appendChild(input);
+
+        input.addEventListener("blur", () => {
+            activeTd.innerHTML = input.value;
+            if (activeTd.hasAttribute("data-value")) {
+                const intValue = Number(input.value);
+                if (isNaN(intValue)) {
+                    alert("You are trying to input a string");
+                    activeTd.innerHTML = activeTd.getAttribute("data-value");
+                    return;
+                }
+                activeTd.setAttribute("data-value", `${input.value}`);
+            }
+            input.remove();
+        });
+
+        input.focus();
+    });
+}
+
 function openTab(page) {
     document.querySelectorAll(".tabcontent").forEach((element) => {
         element.style.display = "none";
@@ -21,8 +79,7 @@ function openTab(page) {
     document.querySelector(`#${page}`).style.display = "block";
 }
 
-// DRAW CHART
-function DrawChart(canvas, labels, values, typed = "line") {
+function drawChart(canvas, labels, values, typed = "line") {
     const bcColor = [
         "rgba(255, 99, 132, 0.2)",
         "rgba(54, 162, 235, 0.2)",
@@ -67,65 +124,20 @@ function DrawChart(canvas, labels, values, typed = "line") {
     });
 }
 
-// DRAW TABLE
-function DrawTable(data) {
-    const table = document.querySelector("#df-content");
-
-    for (let i = 0; i < data.length; i++) {
-        const row = document.createElement("tr");
-
-        for (let j = 0; j < data[i].length; j++) {
-            const td = document.createElement("td");
-            td.innerHTML = data[i][j];
-
-            td.addEventListener("click", function (e) {
-                if (td.querySelector("input")) {
-                    return;
-                }
-
-                const input = document.createElement("input");
-                input.value = td.innerHTML;
-                td.innerHTML = "";
-                td.appendChild(input);
-
-                input.addEventListener("blur", function (e) {
-                    td.innerHTML = input.value;
-                    if (i === 1) {
-                        intValue = parseInt(input.value);
-                        if (isNaN(intValue)) {
-                            alert("You are trying to input a string");
-                            td.innerHTML = data[i][j];
-                            return;
-                        }
-                        data[i][j] = intValue;
-                    }
-                    console.log(data);
-                    input.remove();
-                });
-
-                input.focus();
-            });
-
-            row.appendChild(td);
-        }
-
-        table.appendChild(row);
-    }
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     openTab("Chart");
+    const table = document.querySelector("#df-content");
 
     document.querySelectorAll(".tablink").forEach((button) => {
         button.addEventListener("click", () => {
-            console.log(button.dataset.page);
             openTab(button.dataset.page);
         });
     });
 
     const chartObj = document.querySelector("#chartfield").getContext("2d");
     const cData = getData().then((data) => {
-        DrawChart(chartObj, data.labels, data.values);
-        DrawTable([data.labels, data.values]);
+        drawChart(chartObj, data.labels, data.values);
+        drawTable([data.labels, data.values], table);
+        editTable(table);
     });
 });
