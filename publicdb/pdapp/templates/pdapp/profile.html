@@ -1,0 +1,72 @@
+{% extends 'pdapp/layout-no-side.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/profile.css' %}">
+    <script src="{% static 'pdapp/JS/profile.js' %}"></script>
+    <title>Profile</title>
+{% endblock %}
+
+{% block content %}
+<div class="profile-options">
+    <a class="btn1 btn-layer" id="review">Review</a>
+    <a class="btn1 btn-layer" id="suggest">Suggest</a>
+    <a href="{% url 'profile' %}" class="btn1 btn-layer" id="profile">Profile</a>
+</div>
+<div class="profile-body">
+    <div class="profile">
+        <div class="form-floating mg25">
+            <input type="text" class="profile-input form-control me-2" id="floatingInput username" placeholder="Username">
+            <label for="floatingInput">Username</label>
+        </div>
+        <div class="form-floating mg25">
+            <input type="text" class="profile-input form-control me-2" id="floatingInput first-name" placeholder="First name">
+            <label for="floatingInput">First name</label>
+        </div>
+        <div class="form-floating mg25">
+            <input type="text" class="profile-input form-control me-2" id="floatingInput last-name" placeholder="Last name">
+            <label for="floatingInput">Last name</label>
+        </div>
+        <div class="form-floating mg25">
+            <input type="text" class="profile-input form-control me-2" id="floatingInput email" placeholder="E-mail">
+            <label for="floatingInput">E-mail</label>
+        </div>
+        <div class="changepass mg10">
+            <a href="#" class="change-password-link">Change</a>
+        </div>
+        <div class="form-floating with-change">
+            <input type="password" class="form-control" id="floatingPassword pass" placeholder="Password">
+            <label for="floatingPassword">Password</label>
+        </div>
+    </div>
+</div>
+<div class="save">
+    <button class="btn1 btn-layer">Save</button>
+</div>
+<div class="popup" id="popup">
+    <div class="popup-body">
+        <div class="popup-content">
+            <img src="{% static 'pdapp/IMG/cross-small.svg' %}" alt="cross" class="popup-close">
+            <div class="popup-title">Changing password:</div>
+            <div class="popup-text">
+                <div class="form-floating with-change">
+                    <input type="password" class="form-control" id="floatingPassword pass" placeholder="Password">
+                    <label for="floatingPassword">Old password</label>
+                </div>
+                <div class="form-floating with-change">
+                    <input type="password" class="form-control" id="floatingPassword pass" placeholder="Password">
+                    <label for="floatingPassword">New password</label>
+                </div>
+                <div class="form-floating with-change">
+                    <input type="password" class="form-control" id="floatingPassword pass" placeholder="Password">
+                    <label for="floatingPassword">Confirm password</label>
+                </div>
+                <div class="save">
+                    <button type="submit" class="btn1 btn-layer" id="submit">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
