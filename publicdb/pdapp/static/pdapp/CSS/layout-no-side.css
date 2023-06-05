@@ -1,5 +1,6 @@
 :root {
     --main-red: #ff5858;
+    --main-blue: #004dff;
     --nav-background: #f8f9fa;
     --border-color: #ebebeb;
     --hover-pink: #ffe1e1;
@@ -15,13 +16,14 @@ header {
 }
 
 #main-logo {
-    width: 108px;
+    max-width: 60px;
     height: auto;
 }
 
 .nav-link {
     font-size: 18px;
     position: relative;
+    margin: 0 10px;
 }
 
 .nav-link::before {
@@ -31,12 +33,12 @@ header {
     bottom: 0;
     width: 0%;
     height: 2px;
-    background-color: var(--main-red);
+    background-color: var(--main-blue);
     transition: 0.5s;
 }
 
 .nav-link:hover {
-    color: var(--main-red);
+    color: var(--main-blue);
     transition: 0.5s;
 }
 
@@ -45,9 +47,14 @@ header {
 }
 
 .search-img-wrap {
-    background-image: url(../IMG/search-passive.svg);
+    background-image: url(../IMG/search-active.svg);
     width: 24px;
     height: 24px;
+    position: absolute;
+    top: 50%;
+    left: 54%;
+    background-size: cover;
+    transform: translate(-50%, -50%);
 }
 
 #search-button:hover .search-img-wrap {
@@ -57,4 +64,73 @@ header {
 .content {
     width: 60%;
     margin: 0 auto;
+}
+
+.btn1 {
+    width: 130px;
+    height: 50px;
+    margin-left: 10px;
+    color: #fff;
+    border-radius: 5px;
+    padding: 10px 25px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 500;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 1px 1px 1px 0px rgba(255,255,255,.5),
+     7px 7px 20px 0px rgba(0,0,0,.1),
+     4px 4px 5px 0px rgba(0,0,0,.1);
+    outline: none;
+    font-size: 1rem;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-layer {
+    background: var(--main-blue);
+    background: linear-gradient(0deg, var(--main-blue) 0%, var(--main-blue) 100%);
+    border: none;
+}
+  
+.btn-layer:before {
+    height: 0%;
+    width: 2px;
+}
+
+.btn-layer:hover {
+    color: white;
+    box-shadow: 4px 4px 6px 0 rgba(255,255,255,.5),
+                -4px -4px 6px 0 rgba(116, 125, 136, .5), 
+      inset -4px -4px 6px 0 rgba(255,255,255,.2),
+      inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
+}
+
+.btn-square {
+    width: 30px;
+    height: 50px;
+}
+
+.navbar-tools {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+@media (min-width: 768px) {
+    .navbar-tools {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
+    }
+}
+
+.search-input {
+    width: 450px;
 }

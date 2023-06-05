@@ -1,101 +1,143 @@
-// GET DATA FROM API
 async function getData() {
-    const curreentURL = window.location.href;
-    const objID = parseInt(curreentURL.split('/')[4]);
-    
-    const data = fetch(`/api/tabledata/${objID}/`)
-    .then(Response => Response.json())
-    .catch(Error => {
-        console.log('Error: ', Error);
-    });
+    const currentURL = window.location.href;
+    const objID = parseInt(currentURL.split("/")[4]);
 
-    return await data;
+    if (isNaN(objID)) {
+        throw new Error("Invalid URL: can't extract object ID");
+    }
+
+    try {
+        const response = await fetch(`/api/tabledata/${objID}/`);
+        if (!response.ok) {
+            throw new Error(
+                `Network response was not ok: ${response.statusText}`
+            );
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(`Fetch Error: ${error}`);
+        throw error;
+    }
 }
 
-// CHANGE TABS
+function drawTable(data, table) {
+    const numOfFields = data.length;
+
+    for (let i = 0; i < numOfFields; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = 0; j < data[i].length; j++) {
+            const td = document.createElement("td");
+
+            if (i == 1) td.setAttribute("data-value", `${data[i][j]}`);
+
+            td.innerHTML = data[i][j];
+            row.appendChild(td);
+        }
+        table.appendChild(row);
+    }
+}
+
+function editTable(table) {
+    table.addEventListener("click", (e) => {
+        const activeTd = e.target;
+
+        if (activeTd.querySelector("input")) {
+            return;
+        }
+
+        const input = document.createElement("input");
+        input.value = activeTd.innerHTML;
+        activeTd.innerHTML = "";
+        activeTd.appendChild(input);
+
+        input.addEventListener("blur", () => {
+            activeTd.innerHTML = input.value;
+            if (activeTd.hasAttribute("data-value")) {
+                const intValue = Number(input.value);
+                if (isNaN(intValue)) {
+                    alert("You are trying to input a string");
+                    activeTd.innerHTML = activeTd.getAttribute("data-value");
+                    return;
+                }
+                activeTd.setAttribute("data-value", `${input.value}`);
+            }
+            input.remove();
+        });
+
+        input.focus();
+    });
+}
+
 function openTab(page) {
-    document.querySelectorAll('.tabcontent').forEach(element => {
-        element.style.display = 'none';
+    document.querySelectorAll(".tabcontent").forEach((element) => {
+        element.style.display = "none";
     });
 
-    document.querySelector(`#${page}`).style.display = 'block';
+    document.querySelector(`#${page}`).style.display = "block";
 }
 
-// DRAW CHART
-function DrawChart(canvas, labels, values, typed='line') {
+function drawChart(canvas, labels, values, typed = "line") {
     const bcColor = [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
+        "rgba(255, 99, 132, 0.2)",
+        "rgba(54, 162, 235, 0.2)",
+        "rgba(255, 206, 86, 0.2)",
+        "rgba(75, 192, 192, 0.2)",
+        "rgba(153, 102, 255, 0.2)",
+        "rgba(255, 159, 64, 0.2)",
     ];
     const bdColor = [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
+        "rgba(255, 99, 132, 1)",
+        "rgba(54, 162, 235, 1)",
+        "rgba(255, 206, 86, 1)",
+        "rgba(75, 192, 192, 1)",
+        "rgba(153, 102, 255, 1)",
+        "rgba(255, 159, 64, 1)",
     ];
 
     const chart = new Chart(canvas, {
         type: typed, // 'pie', 'doughnut', 'bar', 'bubble', 'line', 'polarArea', 'radar', 'scatter'
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Data',
-                data: values,
-                backgroundColor: bcColor,
-                borderColor: bdColor,
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: "Data",
+                    data: values,
+                    backgroundColor: bcColor,
+                    borderColor: bdColor,
+                    borderWidth: 1,
+                },
+            ],
         },
         options: {
             scales: {
                 x: {
-                    beginAtZero: true
+                    beginAtZero: true,
                 },
                 y: {
-                    beginAtZero: true
-                }
-            }
-        }
+                    beginAtZero: true,
+                },
+            },
+        },
     });
 }
 
-// DRAW TABLE
-function DrawTable(data) {
-    const table = document.querySelector('#df-content');
+document.addEventListener("DOMContentLoaded", () => {
+    openTab("Chart");
+    const table = document.querySelector("#df-content");
 
-    for(let i = 0; i < data.length; i++) {
-        const row = document.createElement("tr");
-  
-        for (let element of data[i]) {
-            const data = document.createElement("td");
-            data.innerHTML = element;
-            row.appendChild(data);
-        }
-
-        table.appendChild(row);
-    }
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    openTab('Chart');
-
-    document.querySelectorAll('.tablink').forEach(button => {
-        button.addEventListener('click', () => {
-            console.log(button.dataset.page);
+    document.querySelectorAll(".tablink").forEach((button) => {
+        button.addEventListener("click", () => {
             openTab(button.dataset.page);
         });
     });
 
-    const chartObj = document.querySelector('#chartfield').getContext('2d');
+    const chartObj = document.querySelector("#chartfield").getContext("2d");
     const cData = getData().then((data) => {
-        DrawChart(chartObj, data.labels, data.values);
-        DrawTable([data.labels, data.values]);
+        drawChart(chartObj, data.labels, data.values);
+        drawTable([data.labels, data.values], table);
+        editTable(table);
     });
 });
