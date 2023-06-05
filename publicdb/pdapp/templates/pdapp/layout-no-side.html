@@ -23,17 +23,18 @@
 <body>
     <div class="wrapper">
         <header>
-            <nav class="navbar navbar-expand-lg bg-light">
+            <nav class="navbar navbar-expand-lg bg-light d-flex justify-content-between">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="{% url 'index' %}"><img src="{% static 'pdapp/IMG/logo_transparent_notext.png' %}" alt="ODMS" id="main-logo"></a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                    <div class="collapse navbar-collapse justify-content-center align-items-center" id="navbarSupportedContent">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item"><a class="nav-link" aria-current="page" href="{% url 'index' %}">Home</a></li>
                             <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                            <li class="nav-item"><a class="nav-link" href="https://dolaran.github.io/IM12_theme_2_BD_22_course_work/" target="_blank">Docs</a></li>
+                            <li class="nav-item"><a class="nav-link" href="https://nikitosikvn1.github.io/DB_REST_API/" target="_blank">Docs</a></li>
                             <li class="nav-item"><a class="nav-link" href="#">Github</a></li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Help</a>
@@ -46,13 +47,27 @@
                             </li>
                             <!-- <li class="nav-item"><a class="nav-link disabled">Disabled</a></li> -->
                         </ul>
-                        <form class="d-flex" role="search" action="{% url 'index' %}" method="get">
-                            <input class="form-control me-2" type="search" placeholder="Search datasets" aria-label="Search">
-                            <button class="btn btn-outline-danger" id="search-button" type="submit">
-                                <div class="search-img-wrap"></div>
-                            </button>
-                        </form>
+                        <div class="navbar-tools">
+                            <form class="d-flex" role="search" action="{% url 'index' %}" method="get">
+                                <input class="form-control me-2 search-input" type="search" placeholder="Search datasets" aria-label="Search" name="search">
+                                <button class="btn1 btn-layer btn-square" type="submit">
+                                    <div class="search-img-wrap"></div>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="login">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'profile' %}" class="btn1 btn-layer">
+                                    <div class="text-reg">Profile</div>
+                                </a>
+                            {% else %}
+                                <a href="{% url 'auth' %}" class="btn1 btn-layer">
+                                    <div class="text-reg">Log in</div>
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
+                    
                 </div>
             </nav>
         </header>
