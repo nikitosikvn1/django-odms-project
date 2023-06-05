@@ -10,22 +10,6 @@
     font-size: 18px;
 }
 
-.tablink {
-    background-color: white;
-    float: left;
-    border: 1px solid rgb(226, 226, 226);
-    border-bottom: none;
-    outline: none;
-    cursor: pointer;
-    padding: 5px 16px;
-    font-size: 15px;
-    width: 33%;
-}
-  
-.tablink:hover {
-    background-color: #777;
-}
-  
 .tabcontent {
     display: none;
     min-width: 1152px;
@@ -41,12 +25,17 @@
     border-collapse: collapse;
     width: 100%;
 }
-  
-#df-content td, #df-content th {
+
+#df-content td,
+#df-content th {
     border: 1px solid #ddd;
     padding: 8px;
 }
-  
-#df-content tr:nth-child(even){background-color: #f2f2f2;}
-  
-#df-content tr:hover {background-color: #ddd;}
+
+#df-content tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#df-content tr:hover {
+    background-color: #ddd;
+}

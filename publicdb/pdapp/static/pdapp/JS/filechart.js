@@ -79,7 +79,11 @@ function openTab(page) {
     document.querySelector(`#${page}`).style.display = "block";
 }
 
-function drawChart(canvas, labels, values, typed = "line") {
+function drawChart(canvas, labels, values, typed = "line", chart = null) {
+    if (chart) {
+        chart.destroy();
+    }
+
     const bcColor = [
         "rgba(255, 99, 132, 0.2)",
         "rgba(54, 162, 235, 0.2)",
@@ -97,7 +101,7 @@ function drawChart(canvas, labels, values, typed = "line") {
         "rgba(255, 159, 64, 1)",
     ];
 
-    const chart = new Chart(canvas, {
+    chart = new Chart(canvas, {
         type: typed, // 'pie', 'doughnut', 'bar', 'bubble', 'line', 'polarArea', 'radar', 'scatter'
         data: {
             labels: labels,
@@ -122,22 +126,39 @@ function drawChart(canvas, labels, values, typed = "line") {
             },
         },
     });
+    return chart;
 }
 
+let chart = null;
+let data = null;
+
 document.addEventListener("DOMContentLoaded", () => {
-    openTab("Chart");
+    const chartObj = document.querySelector("#chartfield").getContext("2d");
     const table = document.querySelector("#df-content");
+    openTab("Chart");
+
+    getData().then((fetchedData) => {
+        data = fetchedData;
+        chart = drawChart(chartObj, data.labels, data.values);
+        drawTable([data.labels, data.values], table);
+        editTable(table);
+    });
 
     document.querySelectorAll(".tablink").forEach((button) => {
         button.addEventListener("click", () => {
-            openTab(button.dataset.page);
+            if (button.hasAttribute("data-type")) {
+                openTab("Chart");
+                const type = button.getAttribute("data-type");
+                chart = drawChart(
+                    chartObj,
+                    data.labels,
+                    data.values,
+                    type,
+                    chart
+                );
+            } else {
+                openTab("Table");
+            }
         });
-    });
-
-    const chartObj = document.querySelector("#chartfield").getContext("2d");
-    const cData = getData().then((data) => {
-        drawChart(chartObj, data.labels, data.values);
-        drawTable([data.labels, data.values], table);
-        editTable(table);
     });
 });
