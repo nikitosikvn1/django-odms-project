@@ -20,6 +20,7 @@ from publicdb.settings import MEDIA_ROOT
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import ProtectedError
 import os
+import csv
 
 # Function to delete files created during tests
 def delete_test_entries() -> None:
@@ -583,3 +584,179 @@ class DatasetViewTest(TestCase):
         self.assertTrue('datasetinf' in response.context)
         self.assertEqual(response.context['datasetinf'], self.dataset)
 
+
+class ExportXLSXViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_file_name = "test.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Name", "Job", "Description"])
+        self.test_file = open(self.test_file_name, 'rb')
+        self.user = User.objects.create(username="Testuser", password="12345")
+        self.category = Category.objects.create(name="Test Category", hex_code="#FFFFFF")
+        self.dataset = Dataset.objects.create(
+            name="Test dataset",
+            description="Random description here",
+            category=self.category,
+        )
+        self.dataset_file = DatasetFile.objects.create(
+            name="Test", 
+            description="Test description",
+            file_csv=SimpleUploadedFile(self.test_file.name, self.test_file.read()),
+            dataset=self.dataset,
+            created_by=self.user,
+            provider="Test provider", 
+        )
+        self.test_file.close()
+    
+    def test_invalid_pk(self):
+        response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id}abc/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_nonexistent_dataset_file(self):
+        response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id + 1}/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_existing_dataset_file_with_content(self):
+        response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    
+    def test_existing_dataset_file_no_content(self):
+        self.dataset_file.file_csv.delete()
+        self.test_file_name = "test_empty.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            pass
+        self.test_file = open(self.test_file_name, 'rb')
+        self.dataset_file.file_csv = SimpleUploadedFile(self.test_file.name, self.test_file.read())
+        self.dataset_file.save()
+        self.test_file.close()
+        response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 500)
+    
+    def tearDown(self):
+        delete_test_entries()
+    
+
+class ExportCSVViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_file_name = "test.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Test1", "Test2", "Test3"])
+        self.test_file = open(self.test_file_name, 'rb')
+        self.user = User.objects.create(username="Testuser", password="12345")
+        self.category = Category.objects.create(name="Test Category", hex_code="#FFFFFF")
+        self.dataset = Dataset.objects.create(
+            name="Test dataset",
+            description="Random description here",
+            category=self.category,
+        )
+        self.dataset_file = DatasetFile.objects.create(
+            name="Test", 
+            description="Test description",
+            file_csv=SimpleUploadedFile(self.test_file.name, self.test_file.read()),
+            dataset=self.dataset,
+            created_by=self.user,
+            provider="Test provider", 
+        )
+        self.test_file.close()
+    
+    def test_valid_dataset_file(self):
+        response = self.client.get(f'/exportfile/csv/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(b'Info:,Test,Test description,Test provider' in response.content)
+    
+    def test_invalid_dataset_file_id(self):
+        response = self.client.get('/exportfile/csv/abc/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_nonexistent_dataset_file(self):
+        response = self.client.get(f'/exportfile/csv/{self.dataset_file.id + 1}/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_existing_dataset_file_empty_content(self):
+        self.dataset_file.file_csv.delete()
+        self.test_file_name = "test_empty.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            pass
+        self.test_file = open(self.test_file_name, 'rb')
+        self.dataset_file.file_csv = SimpleUploadedFile(self.test_file.name, self.test_file.read())
+        self.dataset_file.save()
+        self.test_file.close()
+        response = self.client.get(f'/exportfile/csv/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 500)
+    
+    def tearDown(self):
+        delete_test_entries()
+    
+
+class ExportPlotViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_file_name = "test.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Label1", "Label2", "Label3"])
+            writer.writerow([1.0, 2.0, 3.0])
+        self.test_file = open(self.test_file_name, 'rb')
+        self.user = User.objects.create(username="Testuser", password="12345")
+        self.category = Category.objects.create(name="Test Category", hex_code="#FFFFFF")
+        self.dataset = Dataset.objects.create(
+            name="Test dataset",
+            description="Random description here",
+            category=self.category,
+        )
+        self.dataset_file = DatasetFile.objects.create(
+            name="Test", 
+            description="Test description",
+            file_csv=SimpleUploadedFile(self.test_file.name, self.test_file.read()),
+            dataset=self.dataset,
+            created_by=self.user,
+            provider="Test provider", 
+        )
+        self.test_file.close()
+    
+    def test_valid_dataset_file(self):
+        response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'image/png')
+        
+    def test_invalid_dataset_file_id(self):
+        response = self.client.get('/exportfile/plot/abc/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_nonexistent_dataset_file(self):
+        response = self.client.get(f'/exportfile/plot/{self.dataset_file.id + 1}/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_existing_dataset_file_empty_content(self):
+        self.dataset_file.file_csv.delete()
+        self.test_file_name = "test_empty.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            pass
+        self.test_file = open(self.test_file_name, 'rb')
+        self.dataset_file.file_csv = SimpleUploadedFile(self.test_file.name, self.test_file.read())
+        self.dataset_file.save()
+        self.test_file.close()
+        response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_existing_dataset_file_invalid_content(self):
+        self.dataset_file.file_csv.delete()
+        self.test_file_name = "test_invalid.csv"
+        with open(self.test_file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Label1", "Label2", "Label3"])
+            writer.writerow(["Invalid", "Data", "Here"])
+        self.test_file = open(self.test_file_name, 'rb')
+        self.dataset_file.file_csv = SimpleUploadedFile(self.test_file.name, self.test_file.read())
+        self.dataset_file.save()
+        self.test_file.close()
+        response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 404)
+    
+    def tearDown(self):
+        delete_test_entries()
