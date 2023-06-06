@@ -533,3 +533,53 @@ class RegistrationAndLoginViewTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('index'))
+
+
+class LogoutViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.logout_url = reverse('logout')
+        self.user = User.objects.create_user(username='testuser', password='12345')
+
+    def test_logout_view(self):
+        self.client.login(username='testuser', password='12345')
+        response = self.client.get(self.logout_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertRedirects(response, reverse('auth'))
+    
+    def test_logout_view_unauthenticated_user(self):
+        response = self.client.get(self.logout_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('auth'))
+
+
+class DatasetViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = Client()
+        cls.category = Category.objects.create(name="Test category", hex_code="#FFFFFF")
+        cls.dataset = Dataset.objects.create(
+            name="Test Dataset",
+            description="Test description",
+            category=cls.category,
+        )
+
+    def test_dataset_view_success_status_code(self):
+        url = reverse('dataset', kwargs={'pk': self.dataset.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_dataset_view_not_found_status_code(self):
+        url = reverse('dataset', kwargs={'pk': 99999})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_dataset_in_context(self):
+        url = reverse('dataset', kwargs={'pk': self.dataset.id})
+        response = self.client.get(url)
+        self.assertTrue('datasetinf' in response.context)
+        self.assertEqual(response.context['datasetinf'], self.dataset)
+
