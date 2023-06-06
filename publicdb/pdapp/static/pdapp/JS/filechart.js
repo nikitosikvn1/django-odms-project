@@ -40,37 +40,6 @@ function drawTable(data, table) {
     }
 }
 
-function editTable(table) {
-    table.addEventListener("click", (e) => {
-        const activeTd = e.target;
-
-        if (activeTd.querySelector("input")) {
-            return;
-        }
-
-        const input = document.createElement("input");
-        input.value = activeTd.innerHTML;
-        activeTd.innerHTML = "";
-        activeTd.appendChild(input);
-
-        input.addEventListener("blur", () => {
-            activeTd.innerHTML = input.value;
-            if (activeTd.hasAttribute("data-value")) {
-                const intValue = Number(input.value);
-                if (isNaN(intValue)) {
-                    alert("You are trying to input a string");
-                    activeTd.innerHTML = activeTd.getAttribute("data-value");
-                    return;
-                }
-                activeTd.setAttribute("data-value", `${input.value}`);
-            }
-            input.remove();
-        });
-
-        input.focus();
-    });
-}
-
 function openTab(page) {
     document.querySelectorAll(".tabcontent").forEach((element) => {
         element.style.display = "none";
@@ -85,24 +54,24 @@ function drawChart(canvas, labels, values, typed = "line", chart = null) {
     }
 
     const bcColor = [
-        "rgba(255, 99, 132, 0.2)",
-        "rgba(54, 162, 235, 0.2)",
-        "rgba(255, 206, 86, 0.2)",
-        "rgba(75, 192, 192, 0.2)",
-        "rgba(153, 102, 255, 0.2)",
-        "rgba(255, 159, 64, 0.2)",
+        "#43ff64d9",
+        "#36a2eb33",
+        "#ffce5633",
+        "#4bc0c033",
+        "#9966ff33",
+        "#ff9f4033",
     ];
     const bdColor = [
-        "rgba(255, 99, 132, 1)",
-        "rgba(54, 162, 235, 1)",
-        "rgba(255, 206, 86, 1)",
-        "rgba(75, 192, 192, 1)",
-        "rgba(153, 102, 255, 1)",
-        "rgba(255, 159, 64, 1)",
+        "#ff6384",
+        "#36a2eb",
+        "#ffce56",
+        "#4bc0c0",
+        "#9966ff",
+        "#ff9f40",
     ];
 
     chart = new Chart(canvas, {
-        type: typed, // 'pie', 'doughnut', 'bar', 'bubble', 'line', 'polarArea', 'radar', 'scatter'
+        type: typed,
         data: {
             labels: labels,
             datasets: [
@@ -117,12 +86,8 @@ function drawChart(canvas, labels, values, typed = "line", chart = null) {
         },
         options: {
             scales: {
-                x: {
-                    beginAtZero: true,
-                },
-                y: {
-                    beginAtZero: true,
-                },
+                x: { beginAtZero: true },
+                y: { beginAtZero: true },
             },
         },
     });
@@ -133,15 +98,14 @@ let chart = null;
 let data = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    const chartObj = document.querySelector("#chartfield").getContext("2d");
+    const chartCanvas = document.querySelector("#chartfield").getContext("2d");
     const table = document.querySelector("#df-content");
     openTab("Chart");
 
     getData().then((fetchedData) => {
         data = fetchedData;
-        chart = drawChart(chartObj, data.labels, data.values);
+        chart = drawChart(chartCanvas, data.labels, data.values);
         drawTable([data.labels, data.values], table);
-        editTable(table);
     });
 
     document.querySelectorAll(".tablink").forEach((button) => {
@@ -150,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 openTab("Chart");
                 const type = button.getAttribute("data-type");
                 chart = drawChart(
-                    chartObj,
+                    chartCanvas,
                     data.labels,
                     data.values,
                     type,

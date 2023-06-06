@@ -11,15 +11,11 @@
 }
 
 .tabcontent {
-    display: none;
     min-width: 1152px;
-    overflow-x: auto;
     max-height: 650px;
+    overflow-x: auto;
 }
 
-#chartfield {
-    border: 1px solid rgb(226, 226, 226);
-}
 
 #df-content {
     font-family: Arial, Helvetica, sans-serif;
@@ -41,7 +37,8 @@
     background-color: #ddd;
 }
 
-/* .canvas {
-    width: 1150px;
-    height: 720px;
-} */
+.confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
