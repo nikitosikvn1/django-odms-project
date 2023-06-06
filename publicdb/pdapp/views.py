@@ -131,13 +131,10 @@ class DatasetView(DetailView):
     context_object_name = "datasetinf"
 
 
-class FileChartView(View):
-    def get(self, request, pk):
-        datasetfile = get_object_or_404(DatasetFile, pk=pk)
-
-        return render(request, "pdapp/filechart.html", {
-            "datasetfile": datasetfile,
-        })
+class FileChartView(DetailView):
+    model = DatasetFile
+    template_name = "pdapp/filechart.html"
+    context_object_name = "datasetfile"
 
 
 class FaqView(TemplateView):
