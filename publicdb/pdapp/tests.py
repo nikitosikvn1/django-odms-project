@@ -609,6 +609,7 @@ class ExportXLSXViewTest(TestCase):
             provider="Test provider", 
         )
         self.test_file.close()
+        os.remove(self.test_file_name)
     
     def test_invalid_pk(self):
         response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id}abc/')
@@ -634,6 +635,7 @@ class ExportXLSXViewTest(TestCase):
         self.test_file.close()
         response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id}/')
         self.assertEqual(response.status_code, 500)
+        os.remove(self.test_file_name)
     
     def tearDown(self):
         delete_test_entries()
@@ -663,6 +665,7 @@ class ExportCSVViewTest(TestCase):
             provider="Test provider", 
         )
         self.test_file.close()
+        os.remove(self.test_file_name)
     
     def test_valid_dataset_file(self):
         response = self.client.get(f'/exportfile/csv/{self.dataset_file.id}/')
@@ -688,6 +691,7 @@ class ExportCSVViewTest(TestCase):
         self.test_file.close()
         response = self.client.get(f'/exportfile/csv/{self.dataset_file.id}/')
         self.assertEqual(response.status_code, 500)
+        os.remove(self.test_file_name)
     
     def tearDown(self):
         delete_test_entries()
@@ -718,6 +722,7 @@ class ExportPlotViewTest(TestCase):
             provider="Test provider", 
         )
         self.test_file.close()
+        os.remove(self.test_file_name)
     
     def test_valid_dataset_file(self):
         response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
@@ -743,6 +748,7 @@ class ExportPlotViewTest(TestCase):
         self.test_file.close()
         response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
         self.assertEqual(response.status_code, 404)
+        os.remove(self.test_file_name)
     
     def test_existing_dataset_file_invalid_content(self):
         self.dataset_file.file_csv.delete()
@@ -757,6 +763,7 @@ class ExportPlotViewTest(TestCase):
         self.test_file.close()
         response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
         self.assertEqual(response.status_code, 404)
+        os.remove(self.test_file_name)
     
     def tearDown(self):
         delete_test_entries()
