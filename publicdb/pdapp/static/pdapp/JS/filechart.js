@@ -13,7 +13,7 @@ async function getData() {
     const objID = getObjID();
 
     try {
-        const response = await axios.get(`/api/tabledata/${objID}/`);
+        const response = await axios.get(`/api/datasetfile-data/${objID}/`);
 
         return response.data;
     } catch (error) {
