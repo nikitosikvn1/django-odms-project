@@ -1,4 +1,4 @@
-async function getData() {
+function getObjID() {
     const currentURL = window.location.href;
 
     const objID = parseInt(currentURL.split("/")[4]);
@@ -6,22 +6,21 @@ async function getData() {
         throw new Error("Invalid URL: can't extract object ID");
     }
 
-    try {
-        const response = await fetch(`/api/tabledata/${objID}/`);
-        if (!response.ok) {
-            throw new Error(
-                `Network response was not ok: ${response.statusText}`
-            );
-        }
+    return objID;
+}
 
-        const data = await response.json();
-        return data;
+async function getData() {
+    const objID = getObjID();
+
+    try {
+        const response = await axios.get(`/api/tabledata/${objID}/`);
+
+        return response.data;
     } catch (error) {
         console.error(`Fetch Error: ${error}`);
         throw error;
     }
 }
-
 
 function drawTable(data, table) {
     const numOfFields = data.length;
@@ -32,7 +31,7 @@ function drawTable(data, table) {
         for (let j = 0; j < data[i].length; j++) {
             const td = document.createElement("td");
 
-            if (i == 1) td.setAttribute("data-value", `${data[i][j]}`);
+            if (i === 1) td.setAttribute("data-value", `${data[i][j]}`);
 
             td.textContent = data[i][j];
             row.appendChild(td);
@@ -40,7 +39,6 @@ function drawTable(data, table) {
         table.appendChild(row);
     }
 }
-
 
 function editTable(table) {
     table.addEventListener("click", (e) => {
@@ -59,8 +57,8 @@ function editTable(table) {
             activeTd.textContent = input.value;
             if (activeTd.hasAttribute("data-value")) {
                 const intValue = Number(input.value);
-                if (isNaN(intValue)) {
-                    alert("You are trying to input a string");
+                if (isNaN(intValue) || intValue === 0) {
+                    alert("Wrong data format input");
                     activeTd.textContent = activeTd.getAttribute("data-value");
                     return;
                 }
@@ -73,42 +71,88 @@ function editTable(table) {
     });
 }
 
-sendPostRequest = async (url, labels, values) => {
-    try {
-        const response = await axios.post(url, { labels, values });
-        console.log("POST request sent successfully");
-        console.log(response.data);
-    } catch (error) {
-        console.error(error.response.data);
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+                break;
+            }
+        }
     }
-};
+    return cookieValue;
+}
+
+async function sendPostRequest(url, labels, values) {
+    const csrfToken = getCookie("csrftoken");
+    try {
+        const response = await axios.post(
+            url,
+            { labels, values },
+            {
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                },
+            }
+        );
+        if (response.status === 200) {
+            console.log("POST request sent successfully");
+            console.log(response.data);
+            return response.data;
+        } else {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+    } catch (error) {
+        console.error(error.message);
+        throw error;
+    }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const table = document.querySelector("#df-content");
     const confirmButton = document.querySelector(".confirm");
+    let initialData = null;
 
     getData().then((fetchedData) => {
-        drawTable([fetchedData.labels, fetchedData.values], table);
+        initialData = [fetchedData.labels, fetchedData.values];
+        drawTable(initialData, table);
         editTable(table);
     });
 
     function confirmPostRequest() {
-        const currentURL = window.location.href;
-        const objID = parseInt(currentURL.split("/")[4]);
-
-        const postData = [[], []];
+        const objID = getObjID();
 
         const tableRows = table.querySelectorAll("tr");
-        for (let row = 0; row < tableRows.length; row++) {
-            const currentRow = tableRows[row].querySelectorAll("td");
-            
-            currentRow.forEach((cell) => {
-                postData[row].push(cell.textContent);
-            })
+        const postData = Array.from(tableRows).map((row) => {
+            return Array.from(row.querySelectorAll("td")).map(
+                (cell) => cell.textContent
+            );
+        });
+
+        if (JSON.stringify(postData) === JSON.stringify(initialData)) {
+            alert("No changes were made.");
+            return;
         }
-        console.log(postData);
-        sendPostRequest(`/api/tabledata/${objID}/`, postData[0], postData[1]);
-    };
+
+        console.log(initialData);
+
+        sendPostRequest(
+            `/api/tabledata/${objID}/`,
+            postData[0],
+            postData[1]
+        ).then((response) => {
+            if (!response.ok) {
+                alert(`Error sending request: ${response.status}`);
+            }
+            initialData = postData;
+        });
+    }
 
     confirmButton.addEventListener("click", confirmPostRequest);
 });

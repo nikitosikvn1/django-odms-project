@@ -1,21 +1,21 @@
-async function getData() {
+function getObjID() {
     const currentURL = window.location.href;
-    const objID = parseInt(currentURL.split("/")[4]);
 
+    const objID = parseInt(currentURL.split("/")[4]);
     if (isNaN(objID)) {
         throw new Error("Invalid URL: can't extract object ID");
     }
 
-    try {
-        const response = await fetch(`/api/tabledata/${objID}/`);
-        if (!response.ok) {
-            throw new Error(
-                `Network response was not ok: ${response.statusText}`
-            );
-        }
+    return objID;
+}
 
-        const data = await response.json();
-        return data;
+async function getData() {
+    const objID = getObjID();
+
+    try {
+        const response = await axios.get(`/api/tabledata/${objID}/`);
+
+        return response.data;
     } catch (error) {
         console.error(`Fetch Error: ${error}`);
         throw error;
@@ -54,7 +54,7 @@ function drawChart(canvas, labels, values, typed = "line", chart = null) {
     }
 
     const bcColor = [
-        "#43ff64d9",
+        "#ff638433",
         "#36a2eb33",
         "#ffce5633",
         "#4bc0c033",

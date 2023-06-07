@@ -16,7 +16,6 @@
     overflow-x: auto;
 }
 
-
 #df-content {
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
@@ -35,10 +34,4 @@
 
 #df-content tr:hover {
     background-color: #ddd;
-}
-
-.confirm {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
