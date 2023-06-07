@@ -637,6 +637,12 @@ class ExportXLSXViewTest(TestCase):
         self.assertEqual(response.status_code, 500)
         os.remove(self.test_file_name)
     
+    def test_existing_dataset_file_without_actual_csv_file(self):
+        os.remove(self.dataset_file.file_csv.path)
+
+        response = self.client.get(f'/exportfile/xlsx/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 500)
+    
     def tearDown(self):
         delete_test_entries()
     
@@ -692,6 +698,11 @@ class ExportCSVViewTest(TestCase):
         response = self.client.get(f'/exportfile/csv/{self.dataset_file.id}/')
         self.assertEqual(response.status_code, 500)
         os.remove(self.test_file_name)
+    
+    def test_existing_dataset_file_no_actual_file(self):
+        os.remove(self.dataset_file.file_csv.path)
+        response = self.client.get(f'/exportfile/csv/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 500)
     
     def tearDown(self):
         delete_test_entries()
@@ -764,6 +775,11 @@ class ExportPlotViewTest(TestCase):
         response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
         self.assertEqual(response.status_code, 404)
         os.remove(self.test_file_name)
+    
+    def test_existing_dataset_file_no_actual_file(self):
+        os.remove(self.dataset_file.file_csv.path)
+        response = self.client.get(f'/exportfile/plot/{self.dataset_file.id}/')
+        self.assertEqual(response.status_code, 404)
     
     def tearDown(self):
         delete_test_entries()
