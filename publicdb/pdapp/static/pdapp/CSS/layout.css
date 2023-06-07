@@ -204,3 +204,9 @@ header {
 .search-input {
     width: 450px;
 }
+
+.login {
+    display: flex;
+    justify-content:end;
+    align-items: center;
+}
