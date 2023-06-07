@@ -56,6 +56,11 @@
             <li class="nav-item">
                 <button class="nav-link tablink" data-page="Table">Table</button>
             </li>
+            {% if user|has_group:"Editor" %}
+                <li class="nav-item">
+                    <a href="{% url 'editfile' datasetfile.pk %}" class="nav-link">Edit Dataset file</a>
+                </li>
+            {% endif %}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                     Save as
