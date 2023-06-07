@@ -1,0 +1,28 @@
+{% extends 'pdapp/layout-no-side.html' %}
+{% load static %}
+
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'pdapp/CSS/suggest.css' %}">
+    <script src="{% static 'pdapp/JS/suggest.js' %}"></script>
+    <title>Profile</title>
+{% endblock %}
+
+
+{% block content %}
+<div class="profile-options">
+    <a href="{% url 'review' %}" class="btn1 btn-layer" id="review">Review</a>
+    <a href="{% url 'suggest' %}" class="btn1 btn-layer" id="suggest">Suggest</a>
+    <a href="{% url 'profile' %}" class="btn1 btn-layer" id="profile">Profile</a>
+</div>
+<div class="profile-body">
+    <div>
+        <label class="form-label input-title">Download .csv files for a review:</label>
+        <input class="form-control form-control-lg" id="formFileLg" type="file">
+    </div>
+    <div class="button-container">
+        <button class="btn1 btn-layer">Confirm</button>
+    </div>
+    
+</div>
+{% endblock %}
