@@ -1,15 +1,17 @@
 from django.contrib.auth import authenticate
 from django.http import Http404
 
-from rest_framework import permissions, views, generics, status
+from rest_framework import permissions, views, status, viewsets, decorators
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import RefreshToken
 
 import csv
 
 from pdapp.models import Category, Dataset, DatasetFile
-from .serializers import DatasetFileToJsonSerializer
+from .serializers import DatasetFileToJsonSerializer, CategorySerializer, DatasetSerializer, DatasetFileSerializer
 
 
 class ObtainTokenView(views.APIView):
@@ -41,6 +43,11 @@ class ObtainTokenView(views.APIView):
 class DatasetFileAjaxAPIView(views.APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+    
+    def check_permissions(self, request):
+        if request.method != 'POST':
+            return
+        return super().check_permissions(request)
     
     def get_object(self, pk):
         try:
@@ -74,3 +81,79 @@ class DatasetFileAjaxAPIView(views.APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         return Response({'detail': 'Labels and values required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'DELETE']:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return super(CategoryViewSet, self).get_permissions()
+
+    @decorators.action(detail=True, methods=['get'])
+    def datasets(self, request, pk=None):
+        category = self.get_object()
+        datasets = Dataset.objects.filter(category=category)
+        serializer = DatasetSerializer(datasets, many=True)
+        return Response(serializer.data)
+
+
+class DatasetViewSet(viewsets.ModelViewSet):
+    queryset = Dataset.objects.all()
+    serializer_class = DatasetSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'description', 'category__name']
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'DELETE']:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return super(DatasetViewSet, self).get_permissions()
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category_id = self.request.query_params.get('category_id')
+        if category_id is not None:
+            queryset = queryset.filter(category__id=category_id)
+        return queryset
+
+    @decorators.action(detail=True, methods=['get'])
+    def datasetfiles(self, request, pk=None):
+        dataset = self.get_object()
+        datasetfiles = DatasetFile.objects.filter(dataset=dataset)
+        serializer = DatasetFileSerializer(datasetfiles, many=True)
+        return Response(serializer.data)
+
+
+class DatasetFileViewSet(viewsets.ModelViewSet):
+    queryset = DatasetFile.objects.all()
+    serializer_class = DatasetFileSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'description', 'dataset__name', 'provider', 'date_creation']
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'DELETE']:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return super(DatasetFileViewSet, self).get_permissions()
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        dataset_id = self.request.query_params.get('dataset_id')
+        if dataset_id is not None:
+            queryset = queryset.filter(dataset__id=dataset_id)
+        return queryset
