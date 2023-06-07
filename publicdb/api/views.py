@@ -1,51 +1,32 @@
-from rest_framework import generics
-from django.shortcuts import get_object_or_404
-from django.urls import resolve
+from django.contrib.auth import get_user_model, authenticate
+from rest_framework import permissions, views
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from pdapp.models import Category, Dataset, DatasetFile
-from .serializers import CategorySerializer, DatasetSerializer, DatasetFileSerializer
+User = get_user_model()
 
+class ObtainTokenView(views.APIView):
+    permission_classes = [permissions.AllowAny]
 
-data = {
-    'categories': {
-        'model': Category,
-        'serializer': CategorySerializer
-    },
-    'datasets': {
-        'model': Dataset,
-        'serializer': DatasetSerializer
-    },
-    'files': {
-        'model': DatasetFile,
-        'serializer': DatasetFileSerializer
-    }
-}
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username', None)
+        password = request.data.get('password', None)
 
+        if username is None or password is None:
+            return Response({"detail": "Username and password required."}, status=400)
 
-# GET LIST, POST
-class APIview(generics.ListCreateAPIView):
-    def get_queryset(self):
-        URLname = resolve(self.request.path_info).url_name
-        Model = data[URLname]['model']
-        return Model.objects.all()
+        user = authenticate(request, username=username, password=password)
 
-    def get_serializer_class(self):
-        URLname = resolve(self.request.path_info).url_name
-        return data[URLname]['serializer']
+        if user is None:
+            return Response({"detail": "Invalid username/password."}, status=400)
 
+        if not user.groups.filter(name='Editor').exists():
+            return Response({"detail": "Access denied. You do not have permissions to generate a token."}, status=403)
 
-# GET BY ID, PUT, DELETE
-class APIview_pk(generics.RetrieveUpdateDestroyAPIView):
-    def get_queryset(self):
-        URLname = resolve(self.request.path_info).url_name
-        Model = data[URLname]['model']
-        return Model.objects.all()
+        refresh = RefreshToken.for_user(user)
 
-    def get_object(self):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, pk=self.kwargs['pk'])
-        return obj
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
 
-    def get_serializer_class(self):
-        URLname = resolve(self.request.path_info).url_name
-        return data[URLname]['serializer']

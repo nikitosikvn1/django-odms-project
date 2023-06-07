@@ -1,13 +1,8 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
 urlpatterns = [
-    path('categories/', views.APIview.as_view(), name='categories'),
-    path('categories/<int:pk>/', views.APIview_pk.as_view(), name='categories'),
-
-    path('datasets/', views.APIview.as_view(), name='datasets'),
-    path('datasets/<int:pk>/', views.APIview_pk.as_view(), name='datasets'),
-
-    path('files/', views.APIview.as_view(), name='files'),
-    path('files/<int:pk>/', views.APIview_pk.as_view(), name='files'),
+     path('api-token-auth/', views.ObtainTokenView.as_view(), name='api-token-auth'),
+     path('api-token-refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
 ]

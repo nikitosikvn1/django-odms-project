@@ -79,6 +79,12 @@ SESSION_REDIS = {
     'retry_on_timeout': False
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
 SESSION_COOKIE_AGE = 86400
 
 AUTH_PASSWORD_VALIDATORS = [
