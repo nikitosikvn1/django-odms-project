@@ -17,7 +17,4 @@ urlpatterns = [
     path('exportfile/xlsx/<int:pk>/', views.ExportXLSXView.as_view(), name='exportXLSX'),
     path('exportfile/csv/<int:pk>/', views.ExportCSVView.as_view(), name='exportCSV'),
     path('exportfile/plot/<int:pk>/', views.ExportPlotView.as_view(), name='exportPlot'),
-    
-    # API
-    path('api/tabledata/<int:pk>/', views.TableDataAPIView.as_view(), name='tabledata'),
 ]

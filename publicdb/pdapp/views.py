@@ -252,19 +252,3 @@ class ExportPlotView(View):
         response = HttpResponse(buf.getvalue(), content_type='image/png')
         return response
     
-# API VIEWS
-
-class TableDataAPIView(APIView):
-    def get(self, request, pk, *args, **kwargs):
-        obj = get_object_or_404(DatasetFile, pk=pk)
-        path = obj.file_csv.path
-
-        with open(path, newline='') as csvfile:
-            content = list(csv.reader(csvfile))
-
-            dataJson = {
-                "labels": content[0],
-                "values": content[1]
-            }
-
-        return Response(dataJson, status=status.HTTP_200_OK)
