@@ -1,9 +1,16 @@
-from django.contrib.auth import get_user_model, authenticate
-from rest_framework import permissions, views
+from django.contrib.auth import authenticate
+from django.http import Http404
+
+from rest_framework import permissions, views, generics, status
 from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
-User = get_user_model()
+import csv
+
+from pdapp.models import Category, Dataset, DatasetFile
+from .serializers import DatasetFileToJsonSerializer
+
 
 class ObtainTokenView(views.APIView):
     permission_classes = [permissions.AllowAny]
@@ -30,3 +37,40 @@ class ObtainTokenView(views.APIView):
             'access': str(refresh.access_token),
         })
 
+
+class DatasetFileAjaxAPIView(views.APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_object(self, pk):
+        try:
+            datasetfile = DatasetFile.objects.get(pk=pk)
+            if not datasetfile.confirmed:
+                return Http404
+            return datasetfile
+        
+        except DatasetFile.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        datasetfile = self.get_object(pk)
+        serializer = DatasetFileToJsonSerializer(datasetfile)
+        return Response(serializer.data)
+
+    def post(self, request, pk, format=None):
+        datasetfile = self.get_object(pk)
+        if not datasetfile.confirmed:
+            return Response({'detail': 'Datasetfile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        labels = request.data.get('labels', None)
+        values = request.data.get('values', None)
+
+        if labels is not None and values is not None:
+            with open(datasetfile.file_csv.path, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(labels)
+                writer.writerow(values)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        
+        return Response({'detail': 'Labels and values required.'}, status=status.HTTP_400_BAD_REQUEST)
