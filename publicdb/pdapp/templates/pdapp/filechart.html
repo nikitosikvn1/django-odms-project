@@ -1,5 +1,6 @@
 {% extends 'pdapp/layout-no-side.html' %}
 {% load static %}
+{% load has_group %}
 
 
 {% block head %}
@@ -56,6 +57,11 @@
             <li class="nav-item">
                 <button class="nav-link tablink" data-page="Table">Table</button>
             </li>
+            {% if user|has_group:"Editor" %}
+            <li class="nav-item">
+                <a href="{% url 'editfile' datasetfile.pk %}" class="nav-link">Edit Dataset file</a>
+            </li>
+            {% endif %}
         </ul>
 
 

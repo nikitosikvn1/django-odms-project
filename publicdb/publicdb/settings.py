@@ -96,6 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_URL = 'auth'
 
 LANGUAGE_CODE = 'en-us'
 

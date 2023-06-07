@@ -52,7 +52,7 @@ class IndexView(TemplateView):
             )
             header = f"Search results for: '{search_query}'"
         else:
-            datasets = datasets.order_by('-id')[:10]
+            datasets = datasets.order_by('-id')
             header = "Recent questions"
 
         paginator = Paginator(datasets, 10)
@@ -124,7 +124,6 @@ class LogoutView(AuthLogoutView):
     next_page = reverse_lazy('auth')
 
 
-#@method_decorator(allowed_users(["Analyst"]), name='dispatch')
 class DatasetView(DetailView):
     model = Dataset
     template_name = "pdapp/dataset.html"
@@ -135,6 +134,12 @@ class FileChartView(DetailView):
     model = DatasetFile
     template_name = "pdapp/filechart.html"
     context_object_name = "datasetfile"
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(allowed_users(['Editor']), name='dispatch')
+class EditDatasetFileView(TemplateView):
+    template_name = "pdapp/editdatasetfile.html"
 
 
 class FaqView(TemplateView):

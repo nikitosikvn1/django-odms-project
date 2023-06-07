@@ -1,7 +1,6 @@
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.urls import reverse
 from django.shortcuts import render
-from django.core.exceptions import PermissionDenied
 
 
 def unauthenticated_user(view_func):
@@ -22,6 +21,6 @@ def allowed_users(allowed_roles=[]):
             if group in allowed_roles:
                 return view_func(request, *args, **kwargs)
             else:
-                return HttpResponseForbidden
+                return HttpResponseForbidden()
         return wrapper_func
     return decorator
