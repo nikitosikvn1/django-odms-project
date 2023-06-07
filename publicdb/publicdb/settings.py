@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from decouple import config
 
@@ -66,6 +67,20 @@ DATABASES = {
 }
 
 
+SESSION_ENGINE = 'redis_sessions.session'
+
+SESSION_REDIS = {
+    'host': 'redis',
+    'port': 6379,
+    'db': 0,
+    'password': config('REDIS_PASSWD'),
+    'prefix': 'session',
+    'socket_timeout': 1,
+    'retry_on_timeout': False
+}
+
+SESSION_COOKIE_AGE = 86400
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -93,10 +108,15 @@ USE_TZ = True
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = '/static/'
 
 MEDIA_ROOT = BASE_DIR / "dbfiles"
-MEDIA_URL = 'csv/'
+MEDIA_URL = '/csv/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if 'test' in sys.argv:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    SESSION_COOKIE_AGE = 10
+    print('Using standard static file storage and test sessions during tests')

@@ -20,6 +20,7 @@ django-crispy-forms = "^2.0"
 openpyxl = "^3.1.2"
 matplotlib = "^3.7.1"
 seaborn = "^0.12.2"
+django-redis-sessions = "^0.6.2"
 
 
 [build-system]

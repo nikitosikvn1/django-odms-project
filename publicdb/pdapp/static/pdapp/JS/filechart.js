@@ -1,101 +1,128 @@
-// GET DATA FROM API
+function getObjID() {
+    const currentURL = window.location.href;
+
+    const objID = parseInt(currentURL.split("/")[4]);
+    if (isNaN(objID)) {
+        throw new Error("Invalid URL: can't extract object ID");
+    }
+
+    return objID;
+}
+
 async function getData() {
-    const curreentURL = window.location.href;
-    const objID = parseInt(curreentURL.split('/')[4]);
-    
-    const data = fetch(`/api/tabledata/${objID}/`)
-    .then(Response => Response.json())
-    .catch(Error => {
-        console.log('Error: ', Error);
-    });
+    const objID = getObjID();
 
-    return await data;
+    try {
+        const response = await axios.get(`/api/tabledata/${objID}/`);
+
+        return response.data;
+    } catch (error) {
+        console.error(`Fetch Error: ${error}`);
+        throw error;
+    }
 }
 
-// CHANGE TABS
-function openTab(page) {
-    document.querySelectorAll('.tabcontent').forEach(element => {
-        element.style.display = 'none';
-    });
+function drawTable(data, table) {
+    const numOfFields = data.length;
 
-    document.querySelector(`#${page}`).style.display = 'block';
-}
-
-// DRAW CHART
-function DrawChart(canvas, labels, values, typed='line') {
-    const bcColor = [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)'
-    ];
-    const bdColor = [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-    ];
-
-    const chart = new Chart(canvas, {
-        type: typed, // 'pie', 'doughnut', 'bar', 'bubble', 'line', 'polarArea', 'radar', 'scatter'
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Data',
-                data: values,
-                backgroundColor: bcColor,
-                borderColor: bdColor,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    beginAtZero: true
-                },
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-// DRAW TABLE
-function DrawTable(data) {
-    const table = document.querySelector('#df-content');
-
-    for(let i = 0; i < data.length; i++) {
+    for (let i = 0; i < numOfFields; i++) {
         const row = document.createElement("tr");
-  
-        for (let element of data[i]) {
-            const data = document.createElement("td");
-            data.innerHTML = element;
-            row.appendChild(data);
-        }
 
+        for (let j = 0; j < data[i].length; j++) {
+            const td = document.createElement("td");
+
+            if (i == 1) td.setAttribute("data-value", `${data[i][j]}`);
+
+            td.innerHTML = data[i][j];
+            row.appendChild(td);
+        }
         table.appendChild(row);
     }
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    openTab('Chart');
-
-    document.querySelectorAll('.tablink').forEach(button => {
-        button.addEventListener('click', () => {
-            console.log(button.dataset.page);
-            openTab(button.dataset.page);
-        });
+function openTab(page) {
+    document.querySelectorAll(".tabcontent").forEach((element) => {
+        element.style.display = "none";
     });
 
-    const chartObj = document.querySelector('#chartfield').getContext('2d');
-    const cData = getData().then((data) => {
-        DrawChart(chartObj, data.labels, data.values);
-        DrawTable([data.labels, data.values]);
+    document.querySelector(`#${page}`).style.display = "block";
+}
+
+function drawChart(canvas, labels, values, typed = "line", chart = null) {
+    if (chart) {
+        chart.destroy();
+    }
+
+    const bcColor = [
+        "#ff638433",
+        "#36a2eb33",
+        "#ffce5633",
+        "#4bc0c033",
+        "#9966ff33",
+        "#ff9f4033",
+    ];
+    const bdColor = [
+        "#ff6384",
+        "#36a2eb",
+        "#ffce56",
+        "#4bc0c0",
+        "#9966ff",
+        "#ff9f40",
+    ];
+
+    chart = new Chart(canvas, {
+        type: typed,
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Data",
+                    data: values,
+                    backgroundColor: bcColor,
+                    borderColor: bdColor,
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            scales: {
+                x: { beginAtZero: true },
+                y: { beginAtZero: true },
+            },
+        },
+    });
+    return chart;
+}
+
+let chart = null;
+let data = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+    const chartCanvas = document.querySelector("#chartfield").getContext("2d");
+    const table = document.querySelector("#df-content");
+    openTab("Chart");
+
+    getData().then((fetchedData) => {
+        data = fetchedData;
+        chart = drawChart(chartCanvas, data.labels, data.values);
+        drawTable([data.labels, data.values], table);
+    });
+
+    document.querySelectorAll(".tablink").forEach((button) => {
+        button.addEventListener("click", () => {
+            if (button.hasAttribute("data-type")) {
+                openTab("Chart");
+                const type = button.getAttribute("data-type");
+                chart = drawChart(
+                    chartCanvas,
+                    data.labels,
+                    data.values,
+                    type,
+                    chart
+                );
+            } else {
+                openTab("Table");
+            }
+        });
     });
 });

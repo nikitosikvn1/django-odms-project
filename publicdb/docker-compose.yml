@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: pdapp
       POSTGRES_USER: nikitap
-      POSTGRES_PASSWORD: postH6304!hA-01
+      POSTGRES_PASSWORD: ${PASSWORDDB}
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - ./data/db:/var/lib/postgresql/data
@@ -18,10 +18,22 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       DEBUG: "true"
-      DATABASE_URL: "postgresql://nikitap:postH6304!hA-01@postgresql_db:5432/pdapp"
+      DATABASE_URL: "postgresql://nikitap:${PASSWORDDB}@postgresql_db:5432/pdapp"
+      SECRET_KEY: ${SECRET_KEY}
+      NAMEDB: ${NAMEDB}
+      USERDB: ${USERDB}
+      PASSWORDDB: ${PASSWORDDB}
+      REDIS_PASSWD: ${REDIS_PASSWD}
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     depends_on:
       - postgresql_db
+      - redis
+    
+  redis:
+    image: redis:7.2-rc2-bullseye
+    command: redis-server --requirepass ${REDIS_PASSWD}
+    volumes:
+      - ./data/redis:/data

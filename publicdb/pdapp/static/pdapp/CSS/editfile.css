@@ -11,14 +11,9 @@
 }
 
 .tabcontent {
-    display: none;
     min-width: 1152px;
-    overflow-x: auto;
     max-height: 650px;
-}
-
-#chartfield {
-    border: 1px solid rgb(226, 226, 226);
+    overflow-x: auto;
 }
 
 #df-content {
