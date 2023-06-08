@@ -4,8 +4,8 @@ services:
   postgresql_db:
     image: postgres:15.2
     environment:
-      POSTGRES_DB: pdapp
-      POSTGRES_USER: nikitap
+      POSTGRES_DB: ${NAMEDB}
+      POSTGRES_USER: ${USERDB}
       POSTGRES_PASSWORD: ${PASSWORDDB}
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
@@ -18,7 +18,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       DEBUG: "true"
-      DATABASE_URL: "postgresql://nikitap:${PASSWORDDB}@postgresql_db:5432/pdapp"
+      DATABASE_URL: "postgresql://${USERDB}:${PASSWORDDB}@postgresql_db:5432/${NAMEDB}"
       SECRET_KEY: ${SECRET_KEY}
       NAMEDB: ${NAMEDB}
       USERDB: ${USERDB}
