@@ -51,8 +51,15 @@ $ docker-compose up
 $ docker-compose exec django_app python manage.py migrate
 $ docker-compose exec django_app python manage.py createsuperuser
 ```
+![migrate](img/migrate.png)  
+![createsuperuser](img/createsuperuser.png)  
 6. Now go to `http://127.0.0.1:8000/admin/` and enter the credentials you provided when creating the superuser. Here you can create several categories, datasets and dataset files. (When creating dataset files, you need to upload a CSV table with data. In the first row you need to specify labels, in the second - values)  
+![login](img/login.png)  
+![categorydataset](img/category%26dataset.png)  
+![file](img/datasetfile.png)  
 7. Now on the main page you can see the created datasets and their associated files. I think you will understand what to do next.  
+![index](img/index.png)  
+![chart](img/chart.png)  
 
 ## 3. How to run tests  
 If you have started docker-compose services, then just run:
