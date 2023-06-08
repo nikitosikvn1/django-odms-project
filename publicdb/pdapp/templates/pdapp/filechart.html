@@ -62,14 +62,32 @@
                 <a href="{% url 'editfile' datasetfile.pk %}" class="nav-link">Edit Dataset file</a>
             </li>
             {% endif %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                    Save as
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" download-type="csv">
+                            Csv
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" download-type="xlsx">
+                            Xlsx
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" download-type="plot" target="_blank">
+                            Plot(.png)
+                        </a>
+                    </li>
+                </ul>
+            </li>
         </ul>
-
-
         <div id="Chart" class="tabcontent canvas-container">
             <canvas class="canvas" id="chartfield"></canvas>
         </div>
-
-
         <div id="Table" class="tabcontent">
             <table id="df-content"></table>
         </div>
