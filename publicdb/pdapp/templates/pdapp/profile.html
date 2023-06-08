@@ -9,8 +9,7 @@
 
 {% block content %}
 <div class="profile-options">
-    <a class="btn1 btn-layer" id="review">Review</a>
-    <a class="btn1 btn-layer" id="suggest">Suggest</a>
+    <a href="{% url 'suggest' %}" class="btn1 btn-layer" id="suggest">Suggest</a>
     <a href="{% url 'profile' %}" class="btn1 btn-layer" id="profile">Profile</a>
 </div>
 <div class="profile-body">

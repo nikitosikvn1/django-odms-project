@@ -125,4 +125,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    document.querySelectorAll("[download-type]").forEach((e) => {
+        const type = e.getAttribute("download-type");
+        e.setAttribute("href", `/exportfile/${type}/${getObjID()}/`);
+    });
 });
