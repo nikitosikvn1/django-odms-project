@@ -3,21 +3,15 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.core.paginator import Paginator
 
 from django.views.generic import View, TemplateView, DetailView, UpdateView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
-
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm, UserUpdateForm
 from .decorators import unauthenticated_user, allowed_users
@@ -138,9 +132,8 @@ class FileChartView(DetailView):
     context_object_name = "datasetfile"
 
 
-@method_decorator(login_required, name='dispatch')
 @method_decorator(allowed_users(['Editor']), name='dispatch')
-class EditDatasetFileView(TemplateView):
+class EditDatasetFileView(LoginRequiredMixin, TemplateView):
     template_name = "pdapp/editdatasetfile.html"
 
 
