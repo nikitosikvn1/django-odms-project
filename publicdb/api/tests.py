@@ -79,7 +79,7 @@ class DatasetFileSerializerTestCase(TestCase):
         self.assertEqual(serializer.data, expected_data)
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('file')
 
 
 class DatasetFileToJsonSerializerTestCase(TestCase):
@@ -109,7 +109,7 @@ class DatasetFileToJsonSerializerTestCase(TestCase):
         self.assertEqual(values, expected_values)
 
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('file')
 
 
 # ------------------------------

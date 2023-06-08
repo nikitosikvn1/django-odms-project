@@ -2,7 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
@@ -10,14 +12,14 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.core.paginator import Paginator
 
-from django.views.generic import View, TemplateView, DetailView, RedirectView
+from django.views.generic import View, TemplateView, DetailView, UpdateView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm
+from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm, UserUpdateForm
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile
 
@@ -146,8 +148,26 @@ class FaqView(TemplateView):
     template_name = "pdapp/faq.html"
 
 
-class ProfileView(TemplateView):
-    template_name = "pdapp/profile.html"
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'pdapp/profile.html'
+    success_url = reverse_lazy('profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        username = self.request.user.username
+        password = form.cleaned_data.get('confirm_password')
+        user = authenticate(username=username, password=password)
+        
+        if user is not None:
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Incorrect password. Please try again.")
+            return super().form_invalid(form)
+
 
 # EXPORT VIEWS
 

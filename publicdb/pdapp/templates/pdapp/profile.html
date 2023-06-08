@@ -15,33 +15,19 @@
 </div>
 <div class="profile-body">
     <div class="profile">
-        <div class="form-floating mg25">
-            <input type="text" class="profile-input form-control me-2" id="floatingInput username" placeholder="Username">
-            <label for="floatingInput">Username</label>
-        </div>
-        <div class="form-floating mg25">
-            <input type="text" class="profile-input form-control me-2" id="floatingInput first-name" placeholder="First name">
-            <label for="floatingInput">First name</label>
-        </div>
-        <div class="form-floating mg25">
-            <input type="text" class="profile-input form-control me-2" id="floatingInput last-name" placeholder="Last name">
-            <label for="floatingInput">Last name</label>
-        </div>
-        <div class="form-floating mg25">
-            <input type="text" class="profile-input form-control me-2" id="floatingInput email" placeholder="E-mail">
-            <label for="floatingInput">E-mail</label>
-        </div>
-        <div class="changepass mg10">
-            <a href="#" class="change-password-link">Change</a>
-        </div>
-        <div class="form-floating with-change">
-            <input type="password" class="form-control" id="floatingPassword pass" placeholder="Password">
-            <label for="floatingPassword">Password</label>
-        </div>
+        <form action="{% url 'profile' %}" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-floating mg25">
+                {{ field }}
+                <label for="floatingInput">{{ field.name }}</label>
+            </div>
+            {% endfor %}
+            <div class="save">
+                <button type="submit" class="btn1 btn-layer" id="submit">Save</button>
+            </div>
+        </form>
     </div>
-</div>
-<div class="save">
-    <button class="btn1 btn-layer">Save</button>
 </div>
 <div class="popup" id="popup">
     <div class="popup-body">
