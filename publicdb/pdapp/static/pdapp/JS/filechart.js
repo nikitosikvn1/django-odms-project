@@ -13,7 +13,7 @@ async function getData() {
     const objID = getObjID();
 
     try {
-        const response = await axios.get(`/api/tabledata/${objID}/`);
+        const response = await axios.get(`/api/datasetfile-data/${objID}/`);
 
         return response.data;
     } catch (error) {
@@ -124,5 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 openTab("Table");
             }
         });
+    });
+
+    document.querySelectorAll("[download-type]").forEach((e) => {
+        const type = e.getAttribute("download-type");
+        e.setAttribute("href", `/exportfile/${type}/${getObjID()}/`);
     });
 });

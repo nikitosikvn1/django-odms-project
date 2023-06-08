@@ -27,6 +27,20 @@ class CustomAuthenticationForm(AuthenticationForm):
         self.fields['username'].widget.attrs['autofocus'] = True
 
 
+class UserUpdateForm(forms.ModelForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput email', 'placeholder': 'Email'}))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput password', 'placeholder': 'Password'}))
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'confirm_password']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput username', 'placeholder': 'Username'}),
+            'first_name': forms.TextInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput first_name', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput last_name', 'placeholder': 'Last Name'}),
+        }
+
+
 class DatasetFileUploadForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea)
     file_csv = forms.FileField(widget=forms.FileInput, validators=[validate_csv_file])
