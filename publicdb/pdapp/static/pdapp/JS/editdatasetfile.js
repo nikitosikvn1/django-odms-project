@@ -13,8 +13,7 @@ async function getData() {
     const objID = getObjID();
 
     try {
-        const response = await axios.get(`/api/tabledata/${objID}/`);
-
+        const response = await axios.get(`/api/datasetfile-data/${objID}/`);
         return response.data;
     } catch (error) {
         console.error(`Fetch Error: ${error}`);
@@ -143,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(initialData);
 
         sendPostRequest(
-            `/api/tabledata/${objID}/`,
+            `/api/datasetfile-data/${objID}/`,
             postData[0],
             postData[1]
         ).then((response) => {

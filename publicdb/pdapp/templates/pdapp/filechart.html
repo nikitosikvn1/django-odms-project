@@ -1,5 +1,6 @@
 {% extends 'pdapp/layout-no-side.html' %}
 {% load static %}
+{% load has_group %}
 
 
 {% block head %}
@@ -78,6 +79,11 @@
                     </li>
                 </ul>
             </li>
+            {% if user|has_group:"Editor" %}
+            <li class="nav-item">
+                <a href="{% url 'editfile' datasetfile.pk %}" class="nav-link">Edit Dataset file</a>
+            </li>
+            {% endif %}
         </ul>
 
         <div id="Chart" class="tabcontent canvas-container">

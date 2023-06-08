@@ -2,22 +2,18 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.core.paginator import Paginator
 
-from django.views.generic import View, TemplateView, DetailView, RedirectView
+from django.views.generic import View, TemplateView, DetailView, UpdateView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
 
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm
+from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm, UserUpdateForm
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile
 
@@ -52,7 +48,7 @@ class IndexView(TemplateView):
             )
             header = f"Search results for: '{search_query}'"
         else:
-            datasets = datasets.order_by('-id')[:10]
+            datasets = datasets.order_by('-id')
             header = "Recent questions"
 
         paginator = Paginator(datasets, 10)
@@ -124,7 +120,6 @@ class LogoutView(AuthLogoutView):
     next_page = reverse_lazy('auth')
 
 
-#@method_decorator(allowed_users(["Analyst"]), name='dispatch')
 class DatasetView(DetailView):
     model = Dataset
     template_name = "pdapp/dataset.html"
@@ -137,12 +132,35 @@ class FileChartView(DetailView):
     context_object_name = "datasetfile"
 
 
+@method_decorator(allowed_users(['Editor']), name='dispatch')
+class EditDatasetFileView(LoginRequiredMixin, TemplateView):
+    template_name = "pdapp/editdatasetfile.html"
+
+
 class FaqView(TemplateView):
     template_name = "pdapp/faq.html"
 
 
-class ProfileView(TemplateView):
-    template_name = "pdapp/profile.html"
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'pdapp/profile.html'
+    success_url = reverse_lazy('profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        username = self.request.user.username
+        password = form.cleaned_data.get('confirm_password')
+        user = authenticate(username=username, password=password)
+        
+        if user is not None:
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Incorrect password. Please try again.")
+            return super().form_invalid(form)
+
 
 # EXPORT VIEWS
 
@@ -247,19 +265,3 @@ class ExportPlotView(View):
         response = HttpResponse(buf.getvalue(), content_type='image/png')
         return response
     
-# API VIEWS
-
-class TableDataAPIView(APIView):
-    def get(self, request, pk, *args, **kwargs):
-        obj = get_object_or_404(DatasetFile, pk=pk)
-        path = obj.file_csv.path
-
-        with open(path, newline='') as csvfile:
-            content = list(csv.reader(csvfile))
-
-            dataJson = {
-                "labels": content[0],
-                "values": content[1]
-            }
-
-        return Response(dataJson, status=status.HTTP_200_OK)
