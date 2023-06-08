@@ -23,10 +23,10 @@ import os
 import csv
 
 # Function to delete files created during tests
-def delete_test_entries() -> None:
+def delete_test_entries(starts_with: str) -> None:
     directory = f"{MEDIA_ROOT}/csv"
     if os.path.exists(directory):
-        test_files = [f for f in os.listdir(directory) if f.startswith('test')]
+        test_files = [f for f in os.listdir(directory) if f.startswith(starts_with)]
         for file in test_files:
             file_path = os.path.join(directory, file)
             if os.path.isfile(file_path):
@@ -93,7 +93,7 @@ class DatasetFileModelTest(TestCase):
             dataset_file.full_clean()
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('test')
 
 
 class DatasetModelRelationshipTest(TestCase):
@@ -140,7 +140,7 @@ class DatasetFileModelRelationshipTest(TestCase):
             self.user.delete()
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('test')
 
 
 # ------------------------------
@@ -303,7 +303,7 @@ class URLTests(TestCase):
         self.assertEqual(response.status_code, 200)
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('test')
 
 
 # Integration test to check the interaction between Django and Redis.
@@ -644,7 +644,7 @@ class ExportXLSXViewTest(TestCase):
         self.assertEqual(response.status_code, 500)
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('test')
     
 
 class ExportCSVViewTest(TestCase):
@@ -705,7 +705,7 @@ class ExportCSVViewTest(TestCase):
         self.assertEqual(response.status_code, 500)
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('test')
     
 
 class ExportPlotViewTest(TestCase):
@@ -782,4 +782,4 @@ class ExportPlotViewTest(TestCase):
         self.assertEqual(response.status_code, 404)
     
     def tearDown(self):
-        delete_test_entries()
+        delete_test_entries('test')
