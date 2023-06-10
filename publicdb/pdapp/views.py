@@ -9,6 +9,7 @@ from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.core.mail import send_mail
 
 from django.views.generic import View, TemplateView, DetailView, UpdateView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
@@ -89,6 +90,13 @@ class RegistrationAndLoginView(View):
                     )
                     if user is not None:
                         login(request, user)
+                        send_mail(
+                            'Welcome to Open Data Management System',
+                            'This is a test email to check mailgun and django integration',
+                            'from@odmsmail.com',
+                            [user.email],
+                            fail_silently=False,
+                        )
                         messages.success(request, "Successfully registered and logged in.")
                         return HttpResponseRedirect(reverse('index'))
             else:
