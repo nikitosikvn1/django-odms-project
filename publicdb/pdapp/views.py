@@ -11,10 +11,11 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
 
-from django.views.generic import View, TemplateView, DetailView, UpdateView
+from django.views.generic import View, TemplateView, DetailView, UpdateView, FormView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
 
 from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm, UserUpdateForm
+from .mixins import UserIsOwnerMixin, UnauthenticatedUserMixin, UserHasRoleMixin
 from .decorators import unauthenticated_user, allowed_users
 from .models import Category, Dataset, DatasetFile, EmailConfirmation
 
@@ -62,8 +63,7 @@ class IndexView(TemplateView):
         return Category.objects.all()[:5]
     
 
-@method_decorator(unauthenticated_user, name='dispatch')
-class RegistrationAndLoginView(View):
+class RegistrationAndLoginView(UnauthenticatedUserMixin, View):
 
     def get(self, request):
         registration_form = RegistrationForm()
@@ -151,8 +151,8 @@ class FileChartView(DetailView):
     context_object_name = "datasetfile"
 
 
-@method_decorator(allowed_users(['Editor']), name='dispatch')
-class EditDatasetFileView(LoginRequiredMixin, TemplateView):
+class EditDatasetFileView(UserHasRoleMixin, TemplateView):
+    allowed_roles = ['Editor']
     template_name = "pdapp/editdatasetfile.html"
 
 
@@ -170,11 +170,9 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
     def form_valid(self, form):
-        username = self.request.user.username
         password = form.cleaned_data.get('confirm_password')
-        user = authenticate(username=username, password=password)
         
-        if user is not None:
+        if self.request.user.check_password(password):
             return super().form_valid(form)
         else:
             messages.error(self.request, "Incorrect password. Please try again.")

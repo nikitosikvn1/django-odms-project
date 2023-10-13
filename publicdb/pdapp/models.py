@@ -76,7 +76,7 @@ class EmailConfirmation(models.Model):
         return timezone.now() > self.expiration_date
 
     def generate_new_confirmation(self) -> None:
-        if self.is_expired():
+        if self.is_expired:
             self.confirmation_key = uuid.uuid4()
             self.expiration_date = get_expiration_date()
             self.save()
