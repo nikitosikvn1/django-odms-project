@@ -22,15 +22,15 @@ class ObtainTokenView(views.APIView):
         password = request.data.get('password', None)
 
         if username is None or password is None:
-            return Response({"detail": "Username and password required."}, status=400)
+            return Response({"detail": "Username and password required."}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(request, username=username, password=password)
 
         if user is None:
-            return Response({"detail": "Invalid username/password."}, status=400)
+            return Response({"detail": "Invalid username/password."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if not user.groups.filter(name='Editor').exists():
-            return Response({"detail": "Access denied. You do not have permissions to generate a token."}, status=403)
+        if not user.groups.filter(name='Editor').exists() and not user.is_superuser:
+            return Response({"detail": "Access denied. You do not have permissions to generate a token."}, status=status.HTTP_403_FORBIDDEN)
 
         refresh = RefreshToken.for_user(user)
 

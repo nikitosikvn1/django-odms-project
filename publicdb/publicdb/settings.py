@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -69,6 +70,7 @@ DATABASES = {
 
 
 SESSION_ENGINE = 'redis_sessions.session'
+SESSION_COOKIE_AGE = 86400
 
 SESSION_REDIS = {
     'host': 'redis',
@@ -84,11 +86,20 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
 
-SESSION_COOKIE_AGE = 86400
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.eu.mailgun.org'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('MAILGUN_USERNAME')
+EMAIL_HOST_PASSWORD = config('MAILGUN_PASSWORD')
 
 AUTH_PASSWORD_VALIDATORS = [
     {

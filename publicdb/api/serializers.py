@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 import csv
 
 from pdapp.models import Category, Dataset, DatasetFile
@@ -10,13 +11,15 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'hex_code',)
 
 
-class DatasetSerializer(serializers.ModelSerializer):
+class DatasetSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Dataset
         fields = ('id', 'name', 'description', 'category',)
 
 
-class DatasetFileSerializer(serializers.ModelSerializer):
+class DatasetFileSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = serializers.SerializerMethodField()
+
     class Meta:
         model = DatasetFile
         fields = (
@@ -30,6 +33,9 @@ class DatasetFileSerializer(serializers.ModelSerializer):
             'date_creation',
             'confirmed',
         )
+    
+    def get_created_by(self, obj):
+        return obj.created_by.username if obj.created_by else None
 
 
 class DatasetFileToJsonSerializer(serializers.ModelSerializer):

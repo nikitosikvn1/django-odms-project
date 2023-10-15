@@ -9,13 +9,15 @@ from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.core.mail import send_mail
 
-from django.views.generic import View, TemplateView, DetailView, UpdateView
+from django.views.generic import View, TemplateView, DetailView, UpdateView, FormView
 from django.contrib.auth.views import LogoutView as AuthLogoutView
 
 from .forms import RegistrationForm, CustomAuthenticationForm, DatasetFileUploadForm, UserUpdateForm
+from .mixins import UserIsOwnerMixin, UnauthenticatedUserMixin, UserHasRoleMixin
 from .decorators import unauthenticated_user, allowed_users
-from .models import Category, Dataset, DatasetFile
+from .models import Category, Dataset, DatasetFile, EmailConfirmation
 
 import csv
 import matplotlib.pyplot as plt
@@ -61,8 +63,7 @@ class IndexView(TemplateView):
         return Category.objects.all()[:5]
     
 
-@method_decorator(unauthenticated_user, name='dispatch')
-class RegistrationAndLoginView(View):
+class RegistrationAndLoginView(UnauthenticatedUserMixin, View):
 
     def get(self, request):
         registration_form = RegistrationForm()
@@ -81,16 +82,14 @@ class RegistrationAndLoginView(View):
             if registration_form.is_valid():
                 with transaction.atomic():
                     user = registration_form.save(commit=False)
+                    user.is_active = False
                     user.save()
-                    user = authenticate(
-                        request,
-                        username=user.username,
-                        password=request.POST["password1"],
-                    )
-                    if user is not None:
-                        login(request, user)
-                        messages.success(request, "Successfully registered and logged in.")
-                        return HttpResponseRedirect(reverse('index'))
+
+                    email_confirmation = EmailConfirmation.objects.create(user=user, email=user.email)
+                    email_confirmation.send_confirmation_mail()
+
+                    messages.success(request, "Please confirm your email address to complete the registration.")
+                    return HttpResponseRedirect(reverse('index'))
             else:
                 messages.error(request, 'Please correct the errors in the registration form.')
         else:
@@ -116,6 +115,26 @@ class RegistrationAndLoginView(View):
         })
 
 
+class ConfirmEmailView(DetailView):
+    model = EmailConfirmation
+    slug_field = 'confirmation_key'
+    slug_url_kwarg = 'uuid'
+
+    def get(self, request, *args, **kwargs):
+        confirmation = self.get_object()
+
+        if confirmation.is_expired:
+            confirmation.generate_new_confirmation()
+            return HttpResponse("Confirmation link expired. We have sent a new confirmation link to your email.")
+
+        user = confirmation.user
+        user.is_active = True
+        user.save()
+        confirmation.delete()
+
+        return HttpResponse("Email confirmed successfully. You can now log in.")
+
+
 class LogoutView(AuthLogoutView):
     next_page = reverse_lazy('auth')
 
@@ -132,8 +151,8 @@ class FileChartView(DetailView):
     context_object_name = "datasetfile"
 
 
-@method_decorator(allowed_users(['Editor']), name='dispatch')
-class EditDatasetFileView(LoginRequiredMixin, TemplateView):
+class EditDatasetFileView(UserHasRoleMixin, TemplateView):
+    allowed_roles = ['Editor']
     template_name = "pdapp/editdatasetfile.html"
 
 
@@ -151,11 +170,9 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
     def form_valid(self, form):
-        username = self.request.user.username
         password = form.cleaned_data.get('confirm_password')
-        user = authenticate(username=username, password=password)
         
-        if user is not None:
+        if self.request.user.check_password(password):
             return super().form_valid(form)
         else:
             messages.error(self.request, "Incorrect password. Please try again.")

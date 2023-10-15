@@ -1,6 +1,11 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
+from django.core.mail import send_mail
 from django.utils import timezone
+from datetime import timedelta
+
 from .validators import validate_csv_file
 
 # Create your models here.
@@ -46,3 +51,33 @@ class DatasetFile(models.Model):
     
     def __str__(self) -> str:
         return f"{self.name} : {self.created_by}"
+
+
+def get_expiration_date():
+    return timezone.now() + timedelta(hours=1)
+
+class EmailConfirmation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField()
+    confirmation_key = models.UUIDField(default=uuid.uuid4)
+    expiration_date = models.DateTimeField(default=get_expiration_date)
+
+    def send_confirmation_mail(self) -> None:
+        confirm_url = reverse('confirm-email', args=[str(self.confirmation_key)])
+        send_mail(
+            'Please confirm your email address - ODMS',
+            f'Please visit the following link to verify your email: {confirm_url}',
+            'from@odmsmail.com',
+            [self.email],
+        )
+    
+    @property
+    def is_expired(self) -> bool:
+        return timezone.now() > self.expiration_date
+
+    def generate_new_confirmation(self) -> None:
+        if self.is_expired:
+            self.confirmation_key = uuid.uuid4()
+            self.expiration_date = get_expiration_date()
+            self.save()
+            self.send_confirmation_mail()

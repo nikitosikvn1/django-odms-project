@@ -2,62 +2,95 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
-from .models import DatasetFile, Dataset
+from .models import DatasetFile
 from .validators import validate_csv_file
 
+
 class RegistrationForm(UserCreationForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email address'}))
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Password',
+    }))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Repeat your password',
+    }))
 
     class Meta:
         model = User
         fields = ('email', 'username', 'password1', 'password2',)
-    
-    def __init__(self, *args, **kwargs):
-        super(RegistrationForm, self).__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs['placeholder'] = 'Username'
-        self.fields['password1'].widget.attrs['placeholder'] = 'Password'
-        self.fields['password2'].widget.attrs['placeholder'] = 'Repeat your password'
+        widgets = {
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'Email address',
+            }),
+            'username': forms.TextInput(attrs={
+                'placeholder': 'Username',
+            }),
+        }
 
 
 class CustomAuthenticationForm(AuthenticationForm):
-    def __init__(self, *args, **kwargs):
-        super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs['placeholder'] = 'Username'
-        self.fields['password'].widget.attrs['placeholder'] = 'Password'
-        self.fields['username'].widget.attrs['autofocus'] = True
-
-
-class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput email', 'placeholder': 'Email'}))
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput password', 'placeholder': 'Password'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Username',
+        'autofocus': True,
+    }))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'placeholder': 'Password',
+    }))
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'confirm_password']
+        fields = ('username', 'password',)
+
+
+class UserUpdateForm(forms.ModelForm):
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Password',
+    }))
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'confirm_password',)
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput username', 'placeholder': 'Username'}),
-            'first_name': forms.TextInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput first_name', 'placeholder': 'First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'profile-input form-control me-2', 'id': 'floatingInput last_name', 'placeholder': 'Last Name'}),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email',
+            }),
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Username',
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'First Name',
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Last Name',
+            }),
         }
 
 
 class DatasetFileUploadForm(forms.ModelForm):
-    description = forms.CharField(widget=forms.Textarea)
-    file_csv = forms.FileField(widget=forms.FileInput, validators=[validate_csv_file])
-    dataset = forms.ModelChoiceField(queryset=Dataset.objects.all())
+    file_csv = forms.FileField(widget=forms.FileInput(attrs={'class': 'form-control'}), validators=[validate_csv_file])
 
     class Meta:
         model = DatasetFile
         fields = ('name', 'description', 'file_csv', 'dataset', 'provider',)
-    
-    def __init__(self, *args, **kwargs):
-        super(DatasetFileUploadForm, self).__init__(*args, **kwargs)
-
-        for key, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
-        
-        self.fields['name'].widget.attrs['autofocus'] = True
-        self.fields['name'].widget.attrs['placeholder'] = 'Dataset file name'
-        self.fields['description'].widget.attrs['placeholder'] = 'Description'
-        self.fields['provider'].widget.attrs['placeholder'] = 'Provider'
-    
+        widgets = {
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Description',
+            }),
+            'dataset': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+            'provider': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Provider',
+            }),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Dataset file name',
+                'autofocus': True,
+            }),
+        }
